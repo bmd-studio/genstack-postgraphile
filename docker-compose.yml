@@ -1,0 +1,51 @@
+version: '3.7'
+
+services:
+  postgraphile:
+    restart: ${DOCKER_RESTART_POLICY}
+    build:
+      context: ./
+      args:
+        - GS_ENV
+        - BMD_NPM_TOKEN
+        - DOCKER_CONTAINER_PLUGINS_PATH
+        - DOCKER_IMAGE 
+    init: true  
+    cap_drop: 
+      - ALL 
+    env_file:
+      - ${DOCKER_GENERATED_ENV_FILE:-./env/defaults}    
+    networks:
+      - backend
+      - frontend
+    expose:
+      - ${DEFAULT_HTTP_PORT}
+    logging:
+      driver: ${DOCKER_LOGGING_DRIVER}
+      options:
+        max-file: ${DOCKER_LOGGING_MAX_FILE}
+        max-size: ${DOCKER_LOGGING_MAX_SIZE}
+    labels:
+      - traefik.http.routers.${APP_PREFIX}-${SERVICE_NAME}-host.rule=Host(`${SERVICE_NAME}.${APP_PREFIX}.localhost`)
+      - traefik.http.routers.${APP_PREFIX}-${SERVICE_NAME}-path.rule=Host(`${APP_PREFIX}.localhost`) && PathPrefix(`/${SERVICE_NAME}`)
+      
+      - traefik.http.services.${APP_PREFIX}-${SERVICE_NAME}.loadbalancer.server.port=${DEFAULT_HTTP_PORT}
+
+      - traefik.http.middlewares.${APP_PREFIX}-${SERVICE_NAME}-ratelimit.ratelimit.burst=${POSTGRAPHILE_RATE_LIMIT_BURST}
+      - traefik.http.middlewares.${APP_PREFIX}-${SERVICE_NAME}-ratelimit.ratelimit.average=${POSTGRAPHILE_RATE_LIMIT_AVERAGE}
+      - traefik.http.middlewares.${APP_PREFIX}-${SERVICE_NAME}-ratelimit.ratelimit.period=${POSTGRAPHILE_RATE_LIMIT_PERIOD}
+      - traefik.http.middlewares.${APP_PREFIX}-${SERVICE_NAME}-compress.compress=true
+      - traefik.http.middlewares.${APP_PREFIX}-${SERVICE_NAME}-stripprefix.stripprefix.prefixes=/${SERVICE_NAME}
+
+      - traefik.http.middlewares.${APP_PREFIX}-${SERVICE_NAME}-middlewares-path.chain.middlewares=${APP_PREFIX}-${SERVICE_NAME}-ratelimit, ${APP_PREFIX}-${SERVICE_NAME}-compress, ${APP_PREFIX}-${SERVICE_NAME}-stripprefix
+      - traefik.http.routers.${APP_PREFIX}-${SERVICE_NAME}-path.middlewares=${APP_PREFIX}-${SERVICE_NAME}-middlewares-path
+
+      - traefik.http.middlewares.${APP_PREFIX}-${SERVICE_NAME}-middlewares-host.chain.middlewares=${APP_PREFIX}-${SERVICE_NAME}-ratelimit, ${APP_PREFIX}-${SERVICE_NAME}-compress
+      - traefik.http.routers.${APP_PREFIX}-${SERVICE_NAME}-host.middlewares=${APP_PREFIX}-${SERVICE_NAME}-middlewares-host
+
+networks:
+  backend:
+    name: ${APP_PREFIX}_${DOCKER_BACKEND_NETWORK_NAME}
+  frontend:
+    name: ${DOCKER_FRONTEND_NETWORK_NAME}
+
