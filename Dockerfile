@@ -3,13 +3,11 @@ ARG GS_ENV
 
 FROM $DOCKER_IMAGE AS build_shared 
 ARG GS_ENV
-ARG BMD_NPM_TOKEN
 ARG DOCKER_CONTAINER_PLUGINS_PATH
 
 COPY ./ /usr/src/app
 WORKDIR /usr/src/app/
 
-RUN echo $'\n//npm-registry.bmd.dev/:_authToken=${BMD_NPM_TOKEN}' >> ./.npmrc
 RUN /bin/bash setup.sh
 
 FROM build_shared AS build_development

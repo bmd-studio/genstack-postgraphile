@@ -7,7 +7,6 @@ services:
       context: ./
       args:
         - GS_ENV
-        - BMD_NPM_TOKEN
         - DOCKER_CONTAINER_PLUGINS_PATH
         - DOCKER_IMAGE 
     init: true  

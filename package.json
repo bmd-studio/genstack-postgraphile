@@ -1,13 +1,10 @@
 {
-  "name": "@bmd-studio/genstack-container-postgraphile",
-  "version": "1.0.0",
+  "private": true,
   "main": "src/index.js",
   "scripts": {
     "dc": "docker-compose --env-file=./env/defaults -f docker-compose.yml --compatibility",
     "dc:dev": "yarn dc -f docker-compose.development.yml"
   },
-  "author": "BMD Studio",
-  "license": "ISC",
   "dependencies": {
     "@bmd-studio/genstack-environment": "^2.0.0",
     "@bmd-studio/genstack-hooks": "^1.0.1",
