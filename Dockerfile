@@ -4,6 +4,7 @@ FROM $DOCKER_IMAGE
 WORKDIR /usr/src/app/
 COPY ./ ./
 ARG DOCKER_CONTAINER_PLUGINS_PATH
+ARG GS_ENV
 RUN /bin/bash setup.sh
 
 COPY docker-healthcheck.js /usr/local/lib/
