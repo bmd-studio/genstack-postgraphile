@@ -34,11 +34,11 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
 
     // debug
     logger.verbose.authentication(`Getting the JWT token from the request...`);
-    logger.verbose.authentication(`Query:`, _.get(req, `query`));
-    logger.verbose.authentication(`Headers:`, _.get(req, `headers`));
-    logger.verbose.authentication(`Session:`, _.get(req, `session`));
-    logger.verbose.authentication(`Body:`, _.get(req, `body`));
-    logger.verbose.authentication(`Connection parameters:`, _.get(req, `connectionParams`));
+    // logger.verbose.authentication(`Query:`, _.get(req, `query`));
+    // logger.verbose.authentication(`Headers:`, _.get(req, `headers`));
+    // logger.verbose.authentication(`Session:`, _.get(req, `session`));
+    // logger.verbose.authentication(`Body:`, _.get(req, `body`));
+    // logger.verbose.authentication(`Connection parameters:`, _.get(req, `connectionParams`));
 
     // get the token from either: the query parameters, the post, the headers, the current session or GraphQL query variables
     // NOTE: for the parsing of the token from the GET, POST or HEADERS, the package express-bearer-token is used as middleware
@@ -50,9 +50,7 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
       || _.get(req, `body.variables.${POSTGRAPHILE_ACCESS_TOKEN_KEY}`)
       || _.get(req, `connectionParams.${POSTGRAPHILE_ACCESS_TOKEN_KEY}`);
 
-    logger.verbose.authentication(`A JWT token ${_.isEmpty(accessToken) ? 'IS NOT' : 'IS'} found directly in the request.`);
-
-    logger.info.authentication(`A JWT token ${_.isEmpty(accessToken) ? 'IS NOT' : 'IS'} deducted from the request.`);
+    logger.verbose.authentication(`A JWT token is ${_.isEmpty(accessToken) ? 'NOT' : ''} found directly in the request.`);
 
     return accessToken;
   },
@@ -71,14 +69,14 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
     }
 
     // perform verification
-    logger.info.authentication(`A JWT token is being verified...`);
+    logger.verbose.authentication(`A JWT token is being verified...`);
 
     // perform verification
     try {
       payload = await jwt.verify(accessToken, JWT_SECRET);
-      logger.info.authentication(`The JWT token verification succeeded.`);
+      logger.verbose.authentication(`The JWT token verification succeeded.`);
     } catch (exception) {
-      logger.info.authentication(`The JWT token verification failed.`);
+      logger.verbose.authentication(`The JWT token verification failed.`);
     }
 
     return payload;
@@ -93,12 +91,13 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
     let accessToken = '';
     let jwtPayload = {};
 
-    logger.info.authentication(`The identity is being deducted from the request...`);
-
     // attempt to authenticate via the request
     try {
       accessToken = await this.getAccessTokenByRequest(req);
-      jwtPayload = await this.decodeAccessToken(accessToken);
+
+      if (!_.isEmpty(accessToken)) {
+        jwtPayload = await this.decodeAccessToken(accessToken);
+      }
     } catch (error) {
       logger.error.authentication(`An error occurred when getting the JWT token from the request:`);
       logger.error.authentication(error);
@@ -109,8 +108,8 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
       jwtPayload = this.getAnonymousJwtPayload(req);
     }
 
-    logger.info.authentication(`The following identity is deduced from the request:`);
-    logger.info.authentication(jwtPayload);
+    logger.verbose.authentication(`The following identity is deduced from the request:`);
+    logger.verbose.authentication(jwtPayload);
 
     return jwtPayload;
   },

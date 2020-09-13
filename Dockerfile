@@ -13,4 +13,5 @@ HEALTHCHECK --interval=5s --timeout=10s CMD node /usr/local/lib/docker-healthche
 USER node
 
 #CMD tail -f /dev/null
+#CMD npx postgraphile -c postgres://postgres:password@postgresql:5432/proj --schema app_public --port 4000 --host 0.0.0.0
 CMD ["/bin/bash", "exec.sh"]

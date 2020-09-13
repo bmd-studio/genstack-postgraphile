@@ -131,7 +131,7 @@ module.exports = {
     // initialize the morgan logger
     app.use(morgan('tiny'));
   
-    logger.info.express(`Debugging middleware is installed!`);
+    logger.info.express(`Debugging middleware is installed.`);
   },
 
   /**
@@ -156,7 +156,7 @@ module.exports = {
       reqKey: POSTGRAPHILE_ACCESS_TOKEN_KEY
     }));
   
-    logger.info.express(`Parsers middleware is installed!`);
+    logger.info.express(`Parsers middleware is installed.`);
   },
 
   /**
