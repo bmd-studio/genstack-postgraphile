@@ -9,8 +9,6 @@ const {
 const express = require('./express');
 const ConnectionFilterPlugin = require('postgraphile-plugin-connection-filter');
 const LiveQueriesPlugin = require("@graphile/subscriptions-lds").default;
-const GraphilePro = require("@graphile/pro").default;
-const OperationHooks = require("@graphile/operation-hooks").default;
 const PostGraphileNestedMutations = require('postgraphile-plugin-nested-mutations');
 const { PgMutationUpsertPlugin } = require("@fullstackio/postgraphile-upsert-plugin");
 const PgManyToManyPlugin = require("@graphile-contrib/pg-many-to-many");
@@ -68,7 +66,7 @@ const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hoo
 
   // debugging
   // https://github.com/brianc/node-postgres/blob/7de137f9f88611b8fcae5539aa90b6037133f1f1/lib/connection.js#L565-L580
-  extendedErrors: !environment.isProduction() ? ['hint', 'detail', 'errcode' ] : ['errcode'], //'severity', 'code', 'position', 'internalPosition', 'internalQuery', 'where', 'schema', 'table', 'column', 'dataType', 'file', 'line', 'routine', 'constraint'
+  extendedErrors: !environment.isProduction() ? ['hint', 'detail', 'errcode' ] : ['errcode'],
   showErrorStack: !environment.isProduction(),
   disableQueryLog: environment.isProduction(),
 
@@ -81,9 +79,7 @@ const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hoo
   ignoreRBAC: false,
   ignoreIndexes: false,
   setofFunctionsContainNulls: false,
-  allowExplain(req) {
-    return !environment.isProduction();
-  },
+  allowExplain: !environment.isProduction(),
 
   // graphql
   enableQueryBatching: true,
@@ -94,10 +90,6 @@ const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hoo
   enhanceGraphiql: !environment.isProduction(),
 
   // plugins
-  pluginHook: makePluginHook([
-    //GraphilePro,
-    //OperationHooks,
-  ]),
   appendPlugins: [
     ConnectionFilterPlugin,
     PostGraphileNestedMutations,
@@ -113,20 +105,8 @@ const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hoo
     //ShortcutPlugin,
   ],
 
-  // pro plugin
-  defaultPaginationCap: -1,
-  exposeGraphQLCost: true,
-  graphqlDepthLimit: 16,
-  graphqlCostLimit: Infinity,
-  
-  // operation hooks plugin
-  operationMessages: true,
-  operationMessagesPreflight: true,
-
   // live queries
   live: true,
-
-  // NOTE: they are enabled via a dedicated logical decoding server
   ownerConnectionString: getSuperUserUrl(),
 
   // subscriptions
@@ -152,6 +132,12 @@ const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hoo
     const identity = await authentication.getIdentityByRequest(req);
     const identityId = _.get(identity, 'identity_id');
     const identityRole = _.get(identity, 'identity_role', POSTGRES_IDENTITY_ROLE_NAME);
+
+    // TODO: see if there is a way to improve performance of setting these in the DB
+    // from quick tests it shows a performance drop of 30% to 40% in req/s 
+    // this is mainly caused by Postgraphile creating a new pgClient instead of using the cache
+    // when there are no settings. 
+    // SOURCE: https://github.com/graphile/postgraphile/blob/cd23d26743d73d4d54b93a15dc89eb1c90f09a4b/src/postgraphile/withPostGraphileContext.ts#L146
     const pgSettings = {
       
       // required to switch roles in Postgres
@@ -170,11 +156,9 @@ const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hoo
 
   // resolver settings
   additionalGraphQLContextFromRequest: (req, res) => {
-    return {
-      req,
-      res,
-    };
-  }
+    return {};
+  },
+
 }));
 
 logger.info.postgraphile(`PostGraphile middleware is ready to use.`);
