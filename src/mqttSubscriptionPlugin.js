@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const sift = require('sift').default;
+const changeCase = require('change-case');
 const connect = require('mqtt').connect;
 const withFilter = require('graphql-subscriptions').withFilter;
 const MQTTPubSub = require('@bmd-studio/graphql-mqtt-subscriptions').MQTTPubSub;
@@ -309,13 +310,20 @@ const getMqttMessageFilter = (throttler) => {
 
     // check if the topic is related to the postgres database
     if (parsedPgEvent.isPgEvent) {
-      const tableName = parsedPgEvent.tableName;
-      const columnName = parsedPgEvent.columnName;
+      const tableName = changeCase.snakeCase(parsedPgEvent.tableName);
+      const columnName = changeCase.snakeCase(parsedPgEvent.columnName);
       const columnValue = parsedPgEvent.columnValue;
       let hasAccess = false;
 
       try {
-        const { rows } = await pgClient.query(`SELECT ${DATABASE_ID_COLUMN_NAME} FROM ${tableName} WHERE ${columnName} = $1 LIMIT 1;`, [columnValue]);
+        const accessSql = `SELECT ${DATABASE_ID_COLUMN_NAME} FROM ${tableName} WHERE ${columnName} = $1 LIMIT 1;`;
+        const accessVariables = [columnValue];
+
+        logger.verbose.mqttMessage(`Verifying access for message with SQL: `);
+        logger.verbose.mqttMessage(accessSql);
+        logger.verbose.mqttMessage(accessVariables);
+
+        const { rows } = await pgClient.query(accessSql, accessVariables);
         hasAccess = (_.size(rows) === 1);
       } catch (error) {
         // empty
