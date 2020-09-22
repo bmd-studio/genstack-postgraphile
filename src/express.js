@@ -15,7 +15,6 @@ const logger = require('@bmd-studio/genstack-logger').default;
 const {
   COOKIE_PARSER_SECRET,
   POSTGRAPHILE_ACCESS_TOKEN_KEY,
-  JWT_HEADER_PREFIX,
   GRAPHQL_CORS_DOMAINS,
 } = environment.env;
 let defaultApp = null;
@@ -152,7 +151,6 @@ module.exports = {
     app.use(bearerToken({
       bodyKey: POSTGRAPHILE_ACCESS_TOKEN_KEY,
       queryKey: POSTGRAPHILE_ACCESS_TOKEN_KEY,
-      headerKey: JWT_HEADER_PREFIX,
       reqKey: POSTGRAPHILE_ACCESS_TOKEN_KEY
     }));
   
