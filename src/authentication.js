@@ -40,10 +40,12 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
     // logger.verbose.authentication(`Body:`, _.get(req, `body`));
     // logger.verbose.authentication(`Connection parameters:`, _.get(req, `connectionParams`));
 
+    const authorizationHeaderPieces = _.split(_.get(req, `headers.authorization`), ' ');
+    const bearerAccessToken = _.get(authorizationHeaderPieces, 1);
+
     // get the token from either: the query parameters, the post, the headers, the current session or GraphQL query variables
-    // NOTE: for the parsing of the token from the GET, POST or HEADERS, the package express-bearer-token is used as middleware
     // NOTE: headers are fetched in lowercase as they are converted to lowercase when parsing the request
-    const accessToken = _.get(req, `token`)
+    const accessToken = bearerAccessToken
       || _.get(req, `query.${POSTGRAPHILE_ACCESS_TOKEN_KEY}`)
       || _.get(req, `headers.${CUSTOM_HTTP_HEADER_PREFIX}${POSTGRAPHILE_ACCESS_TOKEN_KEY}`.toLowerCase()) 
       || _.get(req, `session.${POSTGRAPHILE_ACCESS_TOKEN_KEY}`) 

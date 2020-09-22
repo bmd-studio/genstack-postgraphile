@@ -23,7 +23,6 @@
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "express-bearer-token": "^2.4.0",
     "express-session": "^1.16.2",
     "graphql-subscriptions": "^1.1.0",
     "helmet": "^3.18.0",
