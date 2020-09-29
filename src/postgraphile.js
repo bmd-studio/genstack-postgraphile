@@ -14,6 +14,7 @@ const { PgMutationUpsertPlugin } = require("@fullstackio/postgraphile-upsert-plu
 const PgManyToManyPlugin = require("@graphile-contrib/pg-many-to-many");
 const PgOrderByRelatedPlugin = require("@graphile-contrib/pg-order-by-related");
 const PgSimplifyInflectorPlugin = require("@graphile-contrib/pg-simplify-inflector");
+const GraphileColumnPrivilegesMutations = require('graphile-column-privileges-mutations');
 
 const environment = require('@bmd-studio/genstack-environment').default;
 const logger = require('@bmd-studio/genstack-logger').default;
@@ -102,8 +103,16 @@ const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hoo
     AggregatesPlugin,
     MqttSubscriptionPlugin,
     RemoveSecretsPlugin,
+
+    // GraphileColumnPrivilegesMutations.PgMutationCreatePlugin,
+    // GraphileColumnPrivilegesMutations.PgMutationUpdateDeletePlugin,
     //ShortcutPlugin,
   ],
+
+  // graphileBuildOptions: {
+  //   // disable the default mutations
+  //   pgDisableDefaultMutations: true
+  // },
 
   // live queries
   live: true,
