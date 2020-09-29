@@ -7,7 +7,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const bearerToken = require('express-bearer-token');
 
 const environment = require('@bmd-studio/genstack-environment').default;
 const logger = require('@bmd-studio/genstack-logger').default;
@@ -15,7 +14,6 @@ const logger = require('@bmd-studio/genstack-logger').default;
 const {
   COOKIE_PARSER_SECRET,
   POSTGRAPHILE_ACCESS_TOKEN_KEY,
-  JWT_HEADER_PREFIX,
   GRAPHQL_CORS_DOMAINS,
 } = environment.env;
 let defaultApp = null;
@@ -147,14 +145,6 @@ module.exports = {
     
     // initialize cookie parser
     app.use(cookieParser(COOKIE_PARSER_SECRET));
-    
-    // initialize token parser
-    app.use(bearerToken({
-      bodyKey: POSTGRAPHILE_ACCESS_TOKEN_KEY,
-      queryKey: POSTGRAPHILE_ACCESS_TOKEN_KEY,
-      headerKey: JWT_HEADER_PREFIX,
-      reqKey: POSTGRAPHILE_ACCESS_TOKEN_KEY
-    }));
   
     logger.info.express(`Parsers middleware is installed.`);
   },
