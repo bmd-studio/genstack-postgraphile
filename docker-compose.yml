@@ -15,8 +15,12 @@ services:
     env_file:
       - ${DOCKER_GENERATED_ENV_FILE:-./env/defaults}    
     networks:
-      - backend
-      - frontend
+      backend:
+        aliases: 
+          - ${SERVICE_NAME}
+      frontend:
+        aliases: 
+          - ${SERVICE_NAME} 
     expose:
       - ${DEFAULT_HTTP_PORT}
     deploy:
