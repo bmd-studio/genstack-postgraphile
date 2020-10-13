@@ -13,7 +13,6 @@ const logger = require('@bmd-studio/genstack-logger').default;
 
 const {
   COOKIE_PARSER_SECRET,
-  POSTGRAPHILE_ACCESS_TOKEN_KEY,
   GRAPHQL_CORS_DOMAINS,
 } = environment.env;
 let defaultApp = null;

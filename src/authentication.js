@@ -12,7 +12,7 @@ const {
   POSTGRES_ADMIN_ROLE_NAME,
 
   CUSTOM_HTTP_HEADER_PREFIX,
-  POSTGRAPHILE_ACCESS_TOKEN_KEY,
+  ACCESS_TOKEN_KEY,
 
   JWT_SECRET,
   JWT_ROLE_FIELD,
@@ -46,12 +46,12 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
     // get the token from either: the query parameters, the post, the headers, the current session or GraphQL query variables
     // NOTE: headers are fetched in lowercase as they are converted to lowercase when parsing the request
     const accessToken = bearerAccessToken
-      || _.get(req, `query.${POSTGRAPHILE_ACCESS_TOKEN_KEY}`)
-      || _.get(req, `headers.${CUSTOM_HTTP_HEADER_PREFIX}${POSTGRAPHILE_ACCESS_TOKEN_KEY}`.toLowerCase()) 
-      || _.get(req, `session.${POSTGRAPHILE_ACCESS_TOKEN_KEY}`) 
-      || _.get(req, `body.${POSTGRAPHILE_ACCESS_TOKEN_KEY}`)
-      || _.get(req, `body.variables.${POSTGRAPHILE_ACCESS_TOKEN_KEY}`)
-      || _.get(req, `connectionParams.${POSTGRAPHILE_ACCESS_TOKEN_KEY}`);
+      || _.get(req, `query.${ACCESS_TOKEN_KEY}`)
+      || _.get(req, `headers.${CUSTOM_HTTP_HEADER_PREFIX}${ACCESS_TOKEN_KEY}`.toLowerCase()) 
+      || _.get(req, `session.${ACCESS_TOKEN_KEY}`) 
+      || _.get(req, `body.${ACCESS_TOKEN_KEY}`)
+      || _.get(req, `body.variables.${ACCESS_TOKEN_KEY}`)
+      || _.get(req, `connectionParams.${ACCESS_TOKEN_KEY}`);
 
     logger.verbose.authentication(`A JWT token is ${_.isEmpty(accessToken) ? 'NOT' : ''} found directly in the request.`);
 
