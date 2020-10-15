@@ -83,3 +83,6 @@ _dist/
 # Stryker
 .stryker-tmp
 reports
+
+# Plugins
+plugins
