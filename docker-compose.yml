@@ -32,6 +32,9 @@ services:
         max-file: ${DOCKER_LOGGING_MAX_FILE}
         max-size: ${DOCKER_LOGGING_MAX_SIZE}
     labels:
+      - traefik.enable=true
+      - traefik.docker.network=${DOCKER_FRONTEND_NETWORK_NAME}
+
       - traefik.http.routers.${APP_PREFIX}-${SERVICE_NAME}-host.rule=Host(`${SERVICE_NAME}.${APP_PREFIX}.${PROXY_ROUTER_DOMAIN}`)
       - traefik.http.routers.${APP_PREFIX}-${SERVICE_NAME}-path.rule=PathPrefix(`/${APP_PREFIX}/${SERVICE_NAME}`)
       
