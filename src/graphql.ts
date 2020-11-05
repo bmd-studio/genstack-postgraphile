@@ -1,31 +1,27 @@
-const _ = require('lodash');
-const url = require('url');
-const pg = require('pg');
-const { 
-  postgraphile,
-  makePluginHook,
-} = require('postgraphile');
+import _ from 'lodash';
+import url from 'url';
+import pg from 'pg';
+import { postgraphile } from 'postgraphile';
+import { Request, Response } from 'express';
 
-const express = require('./express');
-const ConnectionFilterPlugin = require('postgraphile-plugin-connection-filter');
-const LiveQueriesPlugin = require("@graphile/subscriptions-lds").default;
-const PostGraphileNestedMutations = require('postgraphile-plugin-nested-mutations');
-const { PgMutationUpsertPlugin } = require("@fullstackio/postgraphile-upsert-plugin");
-const PgManyToManyPlugin = require("@graphile-contrib/pg-many-to-many");
-const PgOrderByRelatedPlugin = require("@graphile-contrib/pg-order-by-related");
-const PgSimplifyInflectorPlugin = require("@graphile-contrib/pg-simplify-inflector");
-const GraphileColumnPrivilegesMutations = require('graphile-column-privileges-mutations');
+import ConnectionFilterPlugin from 'postgraphile-plugin-connection-filter';
+import LiveQueriesPlugin from '@graphile/subscriptions-lds';
+import PostGraphileNestedMutations from 'postgraphile-plugin-nested-mutations';
+import { PgMutationUpsertPlugin } from "@fullstackio/postgraphile-upsert-plugin";
+import PgManyToManyPlugin from '@graphile-contrib/pg-many-to-many';
+import PgOrderByRelatedPlugin from '@graphile-contrib/pg-order-by-related';
+import PgSimplifyInflectorPlugin from "@graphile-contrib/pg-simplify-inflector";
 
-const environment = require('@bmd-studio/genstack-environment').default;
-const logger = require('@bmd-studio/genstack-logger').default;
-const hooks = require('@bmd-studio/genstack-hooks').default;
+import hooks from '@bmd-studio/genstack-hooks';
 
-const authentication = require('./authentication');
+import logger from './logger';
+import environment from './environment';
+import authentication from './authentication';
 
-const MqttSubscriptionPlugin = require('./mqttSubscriptionPlugin');
-const ShortcutPlugin = require('./shortcutPlugin');
-const RemoveSecretsPlugin = require('./removeSecretsPlugin');
-const AggregatesPlugin = require('./pg-aggregates').default;
+import MqttSubscriptionPlugin from './plugins/MqttSubscriptionPlugin';
+import RemoveSecretsPlugin from './plugins/RemoveSecretsPlugin';
+import AggregatesPlugin from './plugins/aggregates';
+import { ServerContext } from './types';
 
 const {
   POSTGRES_HOST_NAME,
@@ -44,18 +40,22 @@ const {
   GRAPHIQL_ENABLED,
   GRAPHIQL_PATH,
   GRAPHQL_BODY_SIZE_LIMIT,
+
+  MQTT_SUBSCRIPTIONS_ENABLED,
 } = environment.env;
 
-logger.info.postgraphile(`Preparing PostGraphile middleware...`);
+const adminPostgresUser = authentication.prefixRoleName(POSTGRES_ADMIN_ROLE_NAME);
+
+logger.info(`Preparing PostGraphile middleware for Postgres ${POSTGRES_HOST_NAME}:${POSTGRES_PORT} with user ${adminPostgresUser}...`);
 
 const getSuperUserUrl = () => {
   return `postgres://${POSTGRES_SUPER_USER_ROLE_NAME}:${POSTGRES_SUPER_USER_SECRET}@${POSTGRES_HOST_NAME}:${POSTGRES_PORT}/${POSTGRES_DATABASE_NAME}`;
 };
 
-const pgOptions = {
+const pgOptions: pg.ConnectionConfig = {
   host: POSTGRES_HOST_NAME,
-  port: POSTGRES_PORT,
-  user: authentication.prefixRoleName(POSTGRES_ADMIN_ROLE_NAME),
+  port: parseInt(POSTGRES_PORT),
+  user: adminPostgresUser,
   password: POSTGRES_ADMIN_SECRET,
   database: POSTGRES_DATABASE_NAME,
 };
@@ -101,18 +101,10 @@ const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hoo
     PgSimplifyInflectorPlugin,
     
     AggregatesPlugin,
-    MqttSubscriptionPlugin,
     RemoveSecretsPlugin,
 
-    // GraphileColumnPrivilegesMutations.PgMutationCreatePlugin,
-    // GraphileColumnPrivilegesMutations.PgMutationUpdateDeletePlugin,
-    //ShortcutPlugin,
+    MQTT_SUBSCRIPTIONS_ENABLED ? MqttSubscriptionPlugin : () => {},
   ],
-
-  // graphileBuildOptions: {
-  //   // disable the default mutations
-  //   pgDisableDefaultMutations: true
-  // },
 
   // live queries
   live: true,
@@ -122,7 +114,7 @@ const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hoo
   subscriptions: true,
   simpleSubscriptions: true,
   websocketMiddlewares: [
-    (req, res, next) => {
+    (req: Request, res: Response, next: Function) => {
 
       // parse the URL parameters to the query parameters
       // this allows us to support authentication via the query parameters
@@ -134,10 +126,9 @@ const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hoo
 
   // request
   bodySizeLimit: GRAPHQL_BODY_SIZE_LIMIT,
-  enableQueryBatching: true,
   
   // postgres settings
-  pgSettings: async (req) => {
+  pgSettings: async (req: Request) => {
     const identity = await authentication.getIdentityByRequest(req);
     const identityId = _.get(identity, 'identity_id');
     const identityRole = _.get(identity, 'identity_role', POSTGRES_IDENTITY_ROLE_NAME);
@@ -157,28 +148,28 @@ const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hoo
       'jwt.claims.identity_role': identityRole,
     };
 
-    logger.verbose.postgraphile(`The following PG settings were determined to handle the request:`);
-    logger.verbose.postgraphile(pgSettings);
+    logger.verbose(`The following PG settings were determined to handle the request:`);
+    logger.verbose(pgSettings);
 
     return pgSettings;
   },
 
   // resolver settings
-  additionalGraphQLContextFromRequest: (req, res) => {
+  additionalGraphQLContextFromRequest: (req: Request, res: Response) => {
     return {};
   },
 
 }));
 
-logger.info.postgraphile(`PostGraphile middleware is ready to use.`);
+logger.info(`PostGraphile middleware is ready to use.`);
 
 // handle GraphQL requests and pass them on to postgraphile
-module.exports = ({ app, server, router }) => {
+export const install = ({ app, server, router }: ServerContext) => {
 
   // add as middleware
   // NOTE: postgraphile is mounted directly on the app as we are sure that
   // the correct paths (e.g. /graphql) are caught by this middleware
-  logger.info.middleware(`Installing postgraphile middleware...`);
+  logger.info(`Installing postgraphile middleware...`);
   app.use(postgraphileMiddleware);
-  logger.info.middleware(`Postgraphile middleware is installed!`);
+  logger.info(`Postgraphile middleware is installed!`);
 };

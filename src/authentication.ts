@@ -1,26 +1,24 @@
-const _ = require('lodash');
-const jwt = require('jsonwebtoken');
+import _ from 'lodash';
+import jwt from 'jsonwebtoken';
 
-const environment = require('@bmd-studio/genstack-environment').default;
-const logger = require('@bmd-studio/genstack-logger').default;
-const hooks = require('@bmd-studio/genstack-hooks').default;
+import hooks from '@bmd-studio/genstack-hooks';
+
+import environment from './environment';
+import logger from './logger';
+import { AccessToken, JwtPayload } from './types';
 
 const {
   APP_PREFIX,
-
   POSTGRES_ANONYMOUS_ROLE_NAME,
   POSTGRES_ADMIN_ROLE_NAME,
-
   CUSTOM_HTTP_HEADER_PREFIX,
   ACCESS_TOKEN_KEY,
-
   JWT_SECRET,
   JWT_ROLE_FIELD,
-
   AUTH_AUTO_ADMIN_FALLBACK,
 } = environment.env;
 
-module.exports = hooks.wrapResourceWithHooks('authentication', { 
+const authentication = hooks.wrapResourceWithHooks('authentication', { 
 
   /**
    * Get the JWT token from a request where it can be retrieved:
@@ -30,15 +28,15 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
    * @param {*} event 
    * @param {*} req 
    */
-  async getAccessTokenByRequest (req) {
+  getAccessTokenByRequest (req: Request): AccessToken {
 
     // debug
-    logger.verbose.authentication(`Getting the JWT token from the request...`);
-    // logger.verbose.authentication(`Query:`, _.get(req, `query`));
-    // logger.verbose.authentication(`Headers:`, _.get(req, `headers`));
-    // logger.verbose.authentication(`Session:`, _.get(req, `session`));
-    // logger.verbose.authentication(`Body:`, _.get(req, `body`));
-    // logger.verbose.authentication(`Connection parameters:`, _.get(req, `connectionParams`));
+    logger.verbose(`Getting the JWT token from the request...`);
+    logger.verbose(`Query:`, _.get(req, `query`));
+    logger.verbose(`Headers:`, _.get(req, `headers`));
+    logger.verbose(`Session:`, _.get(req, `session`));
+    logger.verbose(`Body:`, _.get(req, `body`));
+    logger.verbose(`Connection parameters:`, _.get(req, `connectionParams`));
 
     const authorizationHeaderPieces = _.split(_.get(req, `headers.authorization`), ' ');
     const bearerAccessToken = _.get(authorizationHeaderPieces, 1);
@@ -53,7 +51,7 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
       || _.get(req, `body.variables.${ACCESS_TOKEN_KEY}`)
       || _.get(req, `connectionParams.${ACCESS_TOKEN_KEY}`);
 
-    logger.verbose.authentication(`A JWT token is ${_.isEmpty(accessToken) ? 'NOT' : ''} found directly in the request.`);
+    logger.verbose(`A JWT token is ${_.isEmpty(accessToken) ? 'NOT' : ''} found directly in the request.`);
 
     return accessToken;
   },
@@ -63,7 +61,7 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
    * 
    * @param {*} accessToken 
    */
-  async decodeAccessToken (accessToken) {
+  async decodeAccessToken (accessToken: string): Promise<JwtPayload> {
     let payload = {};
 
     // guard: check if the token is empty
@@ -72,14 +70,14 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
     }
 
     // perform verification
-    logger.verbose.authentication(`A JWT token is being verified...`);
+    logger.verbose(`A JWT token is being verified...`);
 
     // perform verification
     try {
       payload = await jwt.verify(accessToken, JWT_SECRET);
-      logger.verbose.authentication(`The JWT token verification succeeded.`);
+      logger.verbose(`The JWT token verification succeeded.`);
     } catch (exception) {
-      logger.verbose.authentication(`The JWT token verification failed.`);
+      logger.verbose(`The JWT token verification failed.`);
     }
 
     return payload;
@@ -90,7 +88,7 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
    * By default it will fallback to the anonymous identity
    * @param {*} req 
    */
-  async getIdentityByRequest (req) {
+  async getIdentityByRequest (req: Request): Promise<JwtPayload> {
     let accessToken = '';
     let jwtPayload = {};
 
@@ -102,8 +100,8 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
         jwtPayload = await this.decodeAccessToken(accessToken);
       }
     } catch (error) {
-      logger.error.authentication(`An error occurred when getting the JWT token from the request:`);
-      logger.error.authentication(error);
+      logger.error(`An error occurred when getting the JWT token from the request:`);
+      logger.error(error);
     }
 
     // guard: check if a default identity is required
@@ -111,13 +109,13 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
       jwtPayload = this.getAnonymousJwtPayload(req);
     }
 
-    logger.verbose.authentication(`The following identity is deduced from the request:`);
-    logger.verbose.authentication(jwtPayload);
+    logger.verbose(`The following identity is deduced from the request:`);
+    logger.verbose(jwtPayload);
 
     return jwtPayload;
   },
 
-  getAnonymousJwtPayload (req) {
+  getAnonymousJwtPayload (req: Request): JwtPayload {
     let defaultIdentityRole = POSTGRES_ANONYMOUS_ROLE_NAME;
 
     // check if admin credentials are requested in development environments
@@ -132,7 +130,7 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
     return jwtPayload;
   },
 
-  isAdminByRequest (req) {
+  isAdminByRequest (req: Request): boolean {
  
     // NOTE: headers are fetched in lowercase as they are converted to lowercase when parsing the request
     const loginAsAdmin = _.get(req, `query.admin`, _.get(req, `headers.${CUSTOM_HTTP_HEADER_PREFIX}admin`.toLowerCase()));
@@ -154,7 +152,9 @@ module.exports = hooks.wrapResourceWithHooks('authentication', {
    * Prefix a role name with the project prefix
    * @param {*} roleName 
    */
-  prefixRoleName (roleName) {
+  prefixRoleName (roleName: string): string {
     return `${APP_PREFIX}_${roleName}`;
   },
 });
+
+export default authentication;
