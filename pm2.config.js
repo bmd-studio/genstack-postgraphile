@@ -1,15 +1,16 @@
 const {
-  SERVICE_NAME,
-  PM2_WATCH_DELAY,
-  PM2_MAX_RESTARTS,
-  DEFAULT_DEBUG_PORT,
+  SERVICE_NAME = 'postgraphile',
+  PM2_WATCH_DELAY = 200,
+  PM2_MAX_RESTARTS = Number.MAX_VALUE,
 } = process.env;
 
 module.exports = {
-  apps: [      
+  apps: [       
     {
       name: SERVICE_NAME,
-      script: 'src/index.js',
+      script: 'yarn',
+      interpreter: 'yarn',
+      interpreter_args: `start:debug`,
       watch: true,
       watch_delay: PM2_WATCH_DELAY,
       max_restarts: PM2_MAX_RESTARTS,
@@ -17,8 +18,6 @@ module.exports = {
       watch_options: {
         usePolling: true,
       },              
-      interpreter: '/usr/local/bin/node',
-      interpreter_args: `--inspect=0.0.0.0:${DEFAULT_DEBUG_PORT}`,
-    }
-  ]
+    },
+  ],
 };

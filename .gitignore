@@ -1,3 +1,7 @@
+.git
+.idea
+.DS_Store
+
 # Logs
 logs
 *.log
@@ -53,8 +57,11 @@ build/Release
 .yarn-integrity
 
 # dotenv environment variables file
+env.*
 .env
 .env.*
+/env/*
+!/env/*.example
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -83,6 +90,3 @@ _dist/
 # Stryker
 .stryker-tmp
 reports
-
-# Plugins
-plugins
