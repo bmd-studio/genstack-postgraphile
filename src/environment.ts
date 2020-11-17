@@ -1,5 +1,3 @@
-import dotenvParseVariables from 'dotenv-parse-variables';
-
 import environment from '@bmd-studio/genstack-environment';
 
 export default {
