@@ -22,7 +22,7 @@ export const error = (...args: any[]): void => {
 };
 
 export const verbose = (...args: any[]): void => {
-  return verboseInstance(chalk.red('[VERBOSE]'), ...args);
+  return verboseInstance(chalk.yellow('[VERBOSE]'), ...args);
 };
 
 export default {
