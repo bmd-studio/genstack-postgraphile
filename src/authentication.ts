@@ -136,7 +136,7 @@ const authentication = hooks.wrapResourceWithHooks('authentication', {
     const loginAsAdmin = _.get(req, `query.admin`, _.get(req, `headers.${CUSTOM_HTTP_HEADER_PREFIX}admin`.toLowerCase()));
 
     // only allow auto fallback to admin connection when not in production
-    if (!environment.isDevelopment()) {
+    if (environment.isProduction()) {
       return false;
     }
 
