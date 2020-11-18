@@ -4,7 +4,7 @@ FROM $DOCKER_BASE_IMAGE as build
 WORKDIR /usr/src/app/
 COPY ./ ./
 RUN yarn --frozen-lockfile
-# RUN yarn build
+RUN yarn build
 
 ARG GS_ENV
 ARG DOCKER_CONTAINER_PLUGINS_PATH
