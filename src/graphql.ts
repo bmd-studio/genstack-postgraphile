@@ -41,7 +41,8 @@ const {
   GRAPHIQL_PATH,
   GRAPHQL_BODY_SIZE_LIMIT,
 
-  MQTT_SUBSCRIPTIONS_ENABLED,
+  GRAPHQL_SIMPLIFY_INFLECTOR_ENABLED,
+  GRAPHQL_MQTT_SUBSCRIPTIONS_ENABLED,
 } = environment.env;
 
 const adminPostgresUser = authentication.prefixRoleName(POSTGRES_ADMIN_ROLE_NAME);
@@ -98,12 +99,12 @@ const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hoo
     LiveQueriesPlugin,
     PgManyToManyPlugin,
     PgOrderByRelatedPlugin,
-    PgSimplifyInflectorPlugin,
     
     AggregatesPlugin,
     RemoveSecretsPlugin,
 
-    MQTT_SUBSCRIPTIONS_ENABLED ? MqttSubscriptionPlugin : () => {},
+    GRAPHQL_SIMPLIFY_INFLECTOR_ENABLED ? PgSimplifyInflectorPlugin : () => {},
+    GRAPHQL_MQTT_SUBSCRIPTIONS_ENABLED ? MqttSubscriptionPlugin : () => {},
   ],
 
   // live queries
