@@ -1,15 +1,15 @@
 import { SchemaBuilder } from 'graphile-build';
 import _ from 'lodash';
 import sift from 'sift';
-import changeCase from 'change-case';
+import { snakeCase } from 'change-case';
 import { connect } from 'mqtt';
 import { withFilter } from 'graphql-subscriptions';
 import { MQTTPubSub } from '@bmd-studio/graphql-mqtt-subscriptions';
+import { Build, Build as GraphileBuild, Context as GraphileContext } from 'postgraphile';
+import chalk from 'chalk';
 
 import environment from '../environment';
 import logger from '../logger';
-import { Build, Build as GraphileBuild, Context as GraphileContext } from 'postgraphile';
-
 export interface PgEvent {
   isPgEvent: boolean;
   operationName: string;
@@ -345,10 +345,12 @@ const getMqttMessageFilter = (throttler: MqttMessageThrottler) => {
     const siftFilter = sift(prefixSiftOperators(filter));    
     const { topic } = throttler.getNextQueuedMessage();
     const isExpired = throttler.lastQueueIncrease <= throttler.lastMessageSent;
-    const hasMultipleQueued = throttler.countQueue() !== 1;
+    const hasMultipleQueued = throttler.countQueue() > 1;
     const isFilteredOut = _.isEmpty([payload].filter(siftFilter));
     const isInitializeMessage = _.get(payload, INITIALIZE_PAYLOAD_KEY) === true;
-
+    console.log('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
+    console.log(topic);
+    console.log(payload);
     // check if this was an initialization message
     if (isInitializeMessage) {
       return true;
@@ -357,7 +359,7 @@ const getMqttMessageFilter = (throttler: MqttMessageThrottler) => {
     // check if the message expired, if there are too many messages queued, or if the filter had any results
     // for the filtering we are using the sift npm module where the operators starting with $ are required to start with _ in GraphQL
     if (isExpired || hasMultipleQueued || isFilteredOut) {
-      logger.verbose(`Instant skip of a MQTT message due to expiry.`);
+      logger.verbose(`Instant skip of a MQTT message due to expiry. Is expired: ${isExpired}, has multiple queued: ${hasMultipleQueued}, is filtered out: ${isFilteredOut}.`);
       throttler.decreaseQueue();
       return false;
     }
@@ -367,8 +369,8 @@ const getMqttMessageFilter = (throttler: MqttMessageThrottler) => {
 
     // check if the topic is related to the postgres database
     if (parsedPgEvent.isPgEvent) {
-      const tableName = changeCase.snakeCase(parsedPgEvent.tableName);
-      const columnName = changeCase.snakeCase(parsedPgEvent.columnName);
+      const tableName = snakeCase(parsedPgEvent.tableName);
+      const columnName = snakeCase(parsedPgEvent.columnName);
       const columnValue = parsedPgEvent.columnValue;
       let hasAccess = false;
 
@@ -413,10 +415,20 @@ const mqttMessageResolver = async (payload: MqttPayload, args: SubscriptionArgs,
 };
 
 export default (builder: SchemaBuilder): void => {
-  const mqttClient = connect(`mqtt://${MQTT_HOST_NAME}:${MQTT_PORT}`, {
-    username: MQTT_ADMIN_USERNAME,
-    password: MQTT_ADMIN_SECRET,
-  });
+  let mqttClient;
+
+  try {
+    logger.info(`Connecting to MQTT server on ${chalk.underline(MQTT_HOST_NAME)}:${chalk.underline(MQTT_PORT)} with user ${chalk.underline(MQTT_ADMIN_USERNAME)}...`)
+    mqttClient = connect(`mqtt://${MQTT_HOST_NAME}:${MQTT_PORT}`, {
+      username: MQTT_ADMIN_USERNAME,
+      password: MQTT_ADMIN_SECRET,
+    });
+  } catch (error) {
+    logger.error(`Could not connect to MQTT server`);
+    logger.error(error);
+    process.exit(1);
+  }
+  logger.info(`Successfully connected to the MQTT server.`);
   
   const pubsub = new MQTTPubSub({
     client: mqttClient,
