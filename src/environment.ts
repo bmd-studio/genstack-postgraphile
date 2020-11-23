@@ -12,8 +12,6 @@ const parseEnv = (envUnparsed: any) => {
   });
 };
 
-const parsedProcessEnv = parseEnv(process.env);
-
 const isEnvironment = (type: EnvType) => {
   return GS_ENV === type;
 };
@@ -28,6 +26,8 @@ export default {
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   get env() {
+    const parsedProcessEnv = parseEnv(process.env);
+
     return {
       APP_PREFIX: 'project', 
       DEBUG: 'pg-graphql:error,pg-graphql:info',
