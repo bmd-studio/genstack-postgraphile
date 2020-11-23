@@ -11,7 +11,7 @@ const infoInstance = debug(`${DEBUG_NAMESPACE}:info`);
 const errorInstance = debug(`${DEBUG_NAMESPACE}:error`);
 const verboseInstance = debug(`${DEBUG_NAMESPACE}:verbose`);
 
-debug.enable(environment.env.DEBUG);
+debug.enable(process.env.DEBUG ?? environment.env.DEBUG);
 
 export const info = (...args: any[]): void => {
   return infoInstance(chalk.blue('[INFO]'), ...args);
