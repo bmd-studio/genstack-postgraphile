@@ -17,3 +17,5 @@ export interface ServerContext {
   server: Server;
   router: Router;
 }
+
+export type EnvType = 'development' | 'staging' | 'production';

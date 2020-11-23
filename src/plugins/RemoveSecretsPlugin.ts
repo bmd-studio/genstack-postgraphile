@@ -1,7 +1,7 @@
 import { SchemaBuilder } from 'graphile-build'
 import { flatten, split, omit } from 'lodash';
 
-import environment from '@bmd-studio/genstack-environment';
+import environment from '../environment';
 
 const {
   POSTGRES_IDENTITY_SECRET_COLUMN_NAME,

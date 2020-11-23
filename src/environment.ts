@@ -1,8 +1,30 @@
-import environment from '@bmd-studio/genstack-environment';
+import { EnvType } from './types';
+import dotenvParseVariables from 'dotenv-parse-variables';
+
+const {
+  GS_ENV = 'development',
+} = process.env;
+
+const parseEnv = (envUnparsed: any) => {
+  return dotenvParseVariables(envUnparsed, {
+    assignToProcessEnv: false,
+    overrideProcessEnv: false,
+  });
+}
+
+const isEnvironment = (type: EnvType) => {
+  return GS_ENV === type;
+};
+
+const parsedProcessEnv = parseEnv(process.env);
 
 export default {
-  isProduction: environment.isProduction,
-  isDevelopment: environment.isDevelopment,
+  isProduction: (): boolean => {
+    return isEnvironment('production');
+  },
+  isDevelopment: (): boolean => {
+    return isEnvironment('development');
+  },
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   get env() {
@@ -62,7 +84,7 @@ export default {
       JWT_ROLE_FIELD: 'identity_role',
       JWT_SECRET: 'unknown',
 
-      ...environment.env,
+      ...parsedProcessEnv,
     };
   }
 };
