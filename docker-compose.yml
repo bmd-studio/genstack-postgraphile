@@ -4,7 +4,7 @@ services:
   postgraphile:
     container_name: ${COMPOSE_PROJECT_NAME}_${SERVICE_NAME}_${GS_ENV}
     restart: ${DOCKER_RESTART_POLICY}
-    image: ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}-${GS_ENV}
+    image: ${DOCKER_IMAGE_REGISTRY:-}${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}-${GS_ENV}
     build:
       context: ./
       args:
