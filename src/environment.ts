@@ -10,13 +10,13 @@ const parseEnv = (envUnparsed: any) => {
     assignToProcessEnv: false,
     overrideProcessEnv: false,
   });
-}
+};
+
+const parsedProcessEnv = parseEnv(process.env);
 
 const isEnvironment = (type: EnvType) => {
   return GS_ENV === type;
 };
-
-const parsedProcessEnv = parseEnv(process.env);
 
 export default {
   isProduction: (): boolean => {
@@ -30,8 +30,8 @@ export default {
   get env() {
     return {
       APP_PREFIX: 'project', 
-      DEBUG: 'postgraphile:error,postgraphile:info',
-      DEBUG_NAMESPACE: 'postgraphile',
+      DEBUG: 'pg-graphql:error,pg-graphql:info',
+      DEBUG_NAMESPACE: 'pg-graphql',
 
       DEFAULT_HTTP_PORT: 4000,
 
@@ -86,5 +86,5 @@ export default {
 
       ...parsedProcessEnv,
     };
-  }
+  },
 };
