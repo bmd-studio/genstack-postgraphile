@@ -151,7 +151,7 @@ class MqttMessageThrottler {
   }
 
   getNextQueuedMessage(): MqttMessage {
-    return _.get(this.queuedMessages, 0);
+    return this.queuedMessages?.[0] || {};
   }
 
   increaseQueue(topic: MqttTopic, payload: MqttPayload): void {
@@ -325,9 +325,11 @@ const getMqttMessageIterator = (throttler: MqttMessageThrottler, pubsub: MQTTPub
 
     // instantly publish an event for this client only when requested
     if (initialize) {
-      iterator.pushValue({
+      logger.verbose(`Creating an initialize MQTT message to trigger subscription the first time...`);
+      const payload = {
         [INITIALIZE_PAYLOAD_KEY]: true,
-      });
+      };
+      iterator.pushValue(payload);
     }
 
     return iterator;
@@ -342,15 +344,13 @@ const getMqttMessageFilter = (throttler: MqttMessageThrottler) => {
     const { 
       filter = {}, 
     } = args;
-    const siftFilter = sift(prefixSiftOperators(filter));    
+    const siftFilter = sift(prefixSiftOperators(filter)); 
     const { topic } = throttler.getNextQueuedMessage();
     const isExpired = throttler.lastQueueIncrease <= throttler.lastMessageSent;
     const hasMultipleQueued = throttler.countQueue() > 1;
     const isFilteredOut = _.isEmpty([payload].filter(siftFilter));
     const isInitializeMessage = _.get(payload, INITIALIZE_PAYLOAD_KEY) === true;
-    console.log('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
-    console.log(topic);
-    console.log(payload);
+
     // check if this was an initialization message
     if (isInitializeMessage) {
       return true;
@@ -405,7 +405,7 @@ const getMqttMessageFilter = (throttler: MqttMessageThrottler) => {
 
 const mqttMessageResolver = async (payload: MqttPayload, args: SubscriptionArgs, context: SubscriptionContext): Promise<MqttMessage> => {
   const { throttler } = context;
-  const throttledMessage = throttler.throttledMessage;
+  const throttledMessage = throttler.throttledMessage || {};
   const { topic } = throttledMessage;
 
   return { 
