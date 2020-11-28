@@ -32,6 +32,7 @@ export default {
       APP_PREFIX: 'project', 
       DEBUG: 'pg-graphql:error,pg-graphql:info',
       DEBUG_NAMESPACE: 'pg-graphql',
+      NODE_ENV: 'development',
 
       DEFAULT_HTTP_PORT: 4000,
 
@@ -62,7 +63,7 @@ export default {
       CUSTOM_HTTP_HEADER_PREFIX: 'x-bmd-',
 
       POSTGRES_HOST_NAME: 'postgresql',
-      POSTGRES_PORT: '5432',
+      POSTGRES_PORT: 5432,
       POSTGRES_DATABASE_NAME: 'project',
       POSTGRES_SUPER_USER_ROLE_NAME: 'postgres',
       POSTGRES_SUPER_USER_SECRET: 'password',

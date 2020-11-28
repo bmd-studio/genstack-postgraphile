@@ -1,25 +1,11 @@
-import logger from './logger';
-import environment from './environment';
-import { install as installExpress } from './server';
-import { install as installPostgraphile } from './graphql';
+import { startProcess, stopProcess } from './process';
 
-const {
-  DEFAULT_HTTP_PORT,
-  GRAPHQL_PATH,
-} = environment.env;
-
-// install express
-const { app, server, router } = installExpress({ 
-  httpPath: GRAPHQL_PATH 
+process.on('SIGINT', () => {
+  stopProcess();
 });
 
-// initialize the GraphQL handler
-installPostgraphile({ 
-  app, 
-  server, 
-  router, 
-});
+(async(): Promise<void> => {
+  startProcess();
+})();
 
-server.listen(DEFAULT_HTTP_PORT, () => {
-  logger.info(`🚀 Server running and listening on port ${DEFAULT_HTTP_PORT}...`);
-});
+

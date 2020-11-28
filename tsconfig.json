@@ -18,7 +18,7 @@
     "noUnusedParameters": false,
     "noUnusedLocals": false,
     "esModuleInterop": true,
-    "strictBindCallApply": false,
+    "strictBindCallApply": false
   },
   "include": [
     "src"
@@ -29,6 +29,6 @@
     "**/__mocks__/*"
   ],
   "ts-node": {
-    "files": true,
+    "files": true
   },
 }
