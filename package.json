@@ -10,7 +10,7 @@
     "start:pm2": "pm2-runtime pm2.config.js",
     "start:docker": "yarn build && yarn dc:dev up",
     "start:docker-prod": "yarn dc up",
-    "dc": "docker-compose --env-file=./env/defaults -f docker-compose.yml --compatibility",
+    "dc": "docker-compose --env-file=./env/defaults -f docker-compose.yml -f docker-compose.standalone.yml --compatibility",
     "dc:dev": "cross-env NODE_ENV=development GS_ENV=development yarn dc -f docker-compose.development.yml",
     "test": "yarn test:integration",
     "test:integration": "jest --runInBand --testPathPattern=integration/",
