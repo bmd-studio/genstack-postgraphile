@@ -15,6 +15,7 @@ import { ServerContext } from './types';
 const {
   COOKIE_PARSER_SECRET,
   GRAPHQL_CORS_DOMAINS,
+  GRAPHQL_BODY_SIZE_LIMIT,
 } = environment.env;
 
 const routerCache = {};
@@ -117,7 +118,9 @@ export const installParsers = ({ app }: DefaultMiddlewareOptions) => {
   logger.info(`Installing parsers middleware...`);
 
   // initialize body parser
-  app.use(bodyParser.json());
+  app.use(bodyParser.json({
+    limit: GRAPHQL_BODY_SIZE_LIMIT,
+  }));
   app.use(bodyParser.urlencoded({ extended: false }));
   
   // initialize cookie parser
