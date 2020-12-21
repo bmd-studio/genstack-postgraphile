@@ -2,7 +2,7 @@ import { EnvType } from './types';
 import dotenvParseVariables from 'dotenv-parse-variables';
 
 const {
-  GS_ENV = 'development',
+  GS_ENV = 'production',
 } = process.env;
 
 const parseEnv = (envUnparsed: any) => {
