@@ -1,9 +1,5 @@
-import { EnvType } from './types';
 import dotenvParseVariables from 'dotenv-parse-variables';
-
-const {
-  GS_ENV = 'production',
-} = process.env;
+import { EnvType } from './types';
 
 const parseEnv = (envUnparsed: any) => {
   return dotenvParseVariables(envUnparsed, {
@@ -13,6 +9,10 @@ const parseEnv = (envUnparsed: any) => {
 };
 
 const isEnvironment = (type: EnvType) => {
+  const {
+    GS_ENV = 'production',
+  } = process.env;
+  
   return GS_ENV === type;
 };
 

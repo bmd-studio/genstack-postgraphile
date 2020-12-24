@@ -14,7 +14,6 @@ const MQTT_DOCKER_IMAGE = 'eclipse-mosquitto';
 const MQTT_DOCKER_TAG = '1.6.9';
 
 const APP_PREFIX = 'test';
-const APP_BOOT_TIME = 5 * 1000;
 
 const POSTGRES_HOST_NAME = '0.0.0.0';
 const POSTGRES_DATABASE_NAME = 'test';
@@ -66,8 +65,10 @@ const shutdownTestContainers = async(): Promise<void> => {
 
 const setupEnv = async (): Promise<void> => {
   _.assignIn(process.env, {
+    NODE_ENV: 'development',
+    GS_ENV: 'development',
     APP_PREFIX,    
-    DEFAULT_HTTP_PORT: 4000, //await getPort(),
+    DEFAULT_HTTP_PORT: await getPort(),
 
     POSTGRES_HOST_NAME,
     POSTGRES_PORT: pgContainer.getMappedPort(POSTGRES_INTERNAL_PORT).toString(),
