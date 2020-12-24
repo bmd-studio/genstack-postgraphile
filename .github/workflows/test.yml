@@ -1,0 +1,19 @@
+name: Test
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        node: [ '12', '14' ]
+    name: Using Node ${{ matrix.node }}    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Setup
+        run: yarn setup      
+      - name: Test from source
+        run: yarn test
