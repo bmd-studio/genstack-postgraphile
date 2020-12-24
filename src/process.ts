@@ -34,6 +34,8 @@ export const startProcess = async (): Promise<void> => {
     router, 
   });
 
+  logger.info(`Server starting on port ${DEFAULT_HTTP_PORT}...`);
+  
   return new Promise((resolve, reject) => {
     server.listen(DEFAULT_HTTP_PORT, () => {
       logger.info(`🚀 Server running and listening on port ${DEFAULT_HTTP_PORT}...`);
