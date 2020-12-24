@@ -19,6 +19,7 @@ import environment from './environment';
 import authentication from './authentication';
 
 import MqttSubscriptionPlugin from './plugins/MqttSubscriptionPlugin';
+import ManyToManyInflectorPlugin from './plugins/ManyToManyInflectorPlugin';
 import RemoveSecretsPlugin from './plugins/RemoveSecretsPlugin';
 import AggregatesPlugin from './plugins/aggregates';
 import { ServerContext } from './types';
@@ -46,7 +47,7 @@ const {
   GRAPHQL_MQTT_SUBSCRIPTIONS_ENABLED,
 } = environment.env;
 
-export const install = ({ app, server, router }: ServerContext) => {
+export const install = ({ app }: ServerContext) => {
   const adminPostgresUser = authentication.prefixRoleName(POSTGRES_ADMIN_ROLE_NAME);
   const isTestEnvironment = (NODE_ENV === 'test');
   
@@ -67,6 +68,7 @@ export const install = ({ app, server, router }: ServerContext) => {
   const pgPool = new pg.Pool(pgOptions);
   
   // create postgraphile middleware
+  // @ts-ignore
   const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, hooks.wrapResourceWithHooks('postgraphileOptions', {
   
     // debugging
@@ -109,9 +111,14 @@ export const install = ({ app, server, router }: ServerContext) => {
       AggregatesPlugin,
       RemoveSecretsPlugin,
   
+      GRAPHQL_SIMPLIFY_INFLECTOR_ENABLED ? ManyToManyInflectorPlugin : () => {},
       GRAPHQL_SIMPLIFY_INFLECTOR_ENABLED ? PgSimplifyInflectorPlugin : () => {},
       GRAPHQL_MQTT_SUBSCRIPTIONS_ENABLED ? MqttSubscriptionPlugin : () => {},
     ],
+
+    graphileBuildOptions: {
+      nestedMutationsSimpleFieldNames: GRAPHQL_SIMPLIFY_INFLECTOR_ENABLED ? true : false,
+    },
   
     // live queries
     live: true,
