@@ -45,7 +45,7 @@
     "lodash": "4.17.11",
     "morgan": "1.9.1",
     "mqtt": "4.2.5",
-    "pg": "7.11.0",
+    "pg": "8.5.1",
     "postgraphile": "4.10.0",
     "postgraphile-plugin-connection-filter": "1.1.1",
     "postgraphile-plugin-nested-mutations": "1.0.0-alpha.23",
