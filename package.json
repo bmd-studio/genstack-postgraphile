@@ -50,7 +50,7 @@
     "postgraphile-plugin-connection-filter": "1.1.1",
     "postgraphile-plugin-nested-mutations": "1.0.0-alpha.23",
     "sift": "8.5.0",
-    "upath": "1.1.2"
+    "upath": "2.0.1"
   },
   "devDependencies": {
     "@apollo/client": "3.2.9",
