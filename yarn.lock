@@ -4905,10 +4905,10 @@ postgraphile-core@4.10.0:
     graphile-build-pg "4.10.0"
     tslib "^2.0.1"
 
-postgraphile-plugin-connection-filter@1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/postgraphile-plugin-connection-filter/-/postgraphile-plugin-connection-filter-1.1.1.tgz#f72c3840e880e6b12121a1ae7148a1974c2bf8e6"
-  integrity sha512-U2pBOJXbMm4ahGcZBornF8quGPqmPBYmOpAedGkumtf5aLjmDjpW80kcSYqkwiY0Nu3QR4N6OMqktUMkZKSwDA==
+postgraphile-plugin-connection-filter@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/postgraphile-plugin-connection-filter/-/postgraphile-plugin-connection-filter-2.1.1.tgz#590c650a79f7c551fa0950b0c6f8308930bae0d0"
+  integrity sha512-g2tInSqPFFKKf6jL5uL868HZm9//1L3HmOZAHc0QuRcV7jKMGuFivX1G3OXj8HBxbaSiCyxWUYjVdOYiNsJ4tQ==
 
 postgraphile-plugin-nested-mutations@1.0.0-alpha.23:
   version "1.0.0-alpha.23"
