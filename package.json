@@ -49,7 +49,7 @@
     "postgraphile": "4.10.0",
     "postgraphile-plugin-connection-filter": "1.1.1",
     "postgraphile-plugin-nested-mutations": "1.0.0-alpha.23",
-    "sift": "8.5.0",
+    "sift": "13.5.0",
     "upath": "1.1.2"
   },
   "devDependencies": {

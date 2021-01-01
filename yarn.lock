@@ -5548,10 +5548,10 @@ shimmer@^1.1.0, shimmer@^1.2.0:
   resolved "https://registry.yarnpkg.com/shimmer/-/shimmer-1.2.1.tgz#610859f7de327b587efebf501fb43117f9aff337"
   integrity sha512-sQTKC1Re/rM6XyFM6fIAGHRPVGvyXfgzIDvzoq608vM+jeyVD0Tu1E6Np0Kc2zAIFWIj963V2800iF/9LPieQw==
 
-sift@8.5.0:
-  version "8.5.0"
-  resolved "https://registry.yarnpkg.com/sift/-/sift-8.5.0.tgz#6ab3cb7465cecb58296778ecc3fa22245f3da166"
-  integrity sha512-IdHwlvlDbHYmcPYOfkU89Qo29cPR7fLM0htfeUP9YxeU213oKYH/6d416z+vFj6ArCsH+AzQQ8/rd1TIzRE7LQ==
+sift@13.5.0:
+  version "13.5.0"
+  resolved "https://registry.yarnpkg.com/sift/-/sift-13.5.0.tgz#0f46fd0b2432bd516307d2c32bff3b142a8ab530"
+  integrity sha512-YoS8hmXbmJcf1Gde5bR7+pq69+Nvfv5eHTyv4B00YxJAejTEfzvamG8LHzb0jAFFciMkY05K7GG3P7n/gm0+gg==
 
 signal-exit@^3.0.0, signal-exit@^3.0.2, signal-exit@^3.0.3:
   version "3.0.3"
