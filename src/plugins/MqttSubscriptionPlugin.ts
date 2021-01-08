@@ -404,8 +404,8 @@ const getMqttMessageFilter = (throttler: MqttMessageThrottler) => {
 };
 
 const mqttMessageResolver = async (payload: MqttPayload, args: SubscriptionArgs, context: SubscriptionContext): Promise<MqttMessage> => {
-  const { throttler } = context;
-  const throttledMessage = throttler.throttledMessage || {};
+  const { throttler } = context || {};
+  const throttledMessage = throttler?.throttledMessage || {};
   const { topic } = throttledMessage;
 
   return { 
