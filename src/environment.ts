@@ -47,6 +47,8 @@ export default {
 
       GRAPHQL_SIMPLIFY_INFLECTOR_ENABLED: true,
 
+      GRAPHQL_SUBSCRIPTIONS_ENABLED: true,
+
       ACCESS_TOKEN_KEY: 'accessToken',
 
       COOKIE_PARSER_SECRET: 'unknown',

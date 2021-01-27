@@ -45,6 +45,7 @@ const {
 
   GRAPHQL_SIMPLIFY_INFLECTOR_ENABLED,
   GRAPHQL_MQTT_SUBSCRIPTIONS_ENABLED,
+  GRAPHQL_SUBSCRIPTIONS_ENABLED,
 } = environment.env;
 
 export const install = ({ app }: ServerContext) => {
@@ -121,12 +122,12 @@ export const install = ({ app }: ServerContext) => {
     },
   
     // live queries
-    live: true,
+    live: GRAPHQL_SUBSCRIPTIONS_ENABLED,
     ownerConnectionString: getSuperUserUrl(),
   
     // subscriptions
-    subscriptions: true,
-    simpleSubscriptions: true,
+    subscriptions: GRAPHQL_SUBSCRIPTIONS_ENABLED,
+    simpleSubscriptions: GRAPHQL_SUBSCRIPTIONS_ENABLED,
     websocketMiddlewares: [
       (req: Request, res: Response, next: Function) => {
   
