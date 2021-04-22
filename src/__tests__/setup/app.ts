@@ -8,10 +8,8 @@ import environment from '../../environment';
 const POSTGRES_INTERNAL_PORT = 5432;
 const MQTT_INTERNAL_PORT = 1883;
 
-const POSTGRES_DOCKER_IMAGE = 'postgres';
-const POSTGRES_DOCKER_TAG = '13.0-alpine';
-const MQTT_DOCKER_IMAGE = 'eclipse-mosquitto';
-const MQTT_DOCKER_TAG = '1.6.9';
+const POSTGRES_DOCKER_IMAGE = 'postgres:13.2-alpine';
+const MQTT_DOCKER_IMAGE = 'eclipse-mosquitto:1.6.14';
 
 const APP_PREFIX = 'test';
 
@@ -46,14 +44,14 @@ let pgContainer: StartedTestContainer;
 let mqttContainer: StartedTestContainer; 
 
 const setupTestContainers = async(): Promise<void> => {
-  pgContainer = await new GenericContainer(POSTGRES_DOCKER_IMAGE, POSTGRES_DOCKER_TAG)
+  pgContainer = await new GenericContainer(POSTGRES_DOCKER_IMAGE)
     .withExposedPorts(POSTGRES_INTERNAL_PORT)
     .withEnv('POSTGRES_USER', POSTGRES_SUPER_USER_ROLE_NAME)
     .withEnv('POSTGRES_PASSWORD', POSTGRES_SUPER_USER_SECRET)
     .withEnv('POSTGRES_DB', POSTGRES_DATABASE_NAME)
     .start();
 
-  mqttContainer = await new GenericContainer(MQTT_DOCKER_IMAGE, MQTT_DOCKER_TAG)
+  mqttContainer = await new GenericContainer(MQTT_DOCKER_IMAGE)
     .withExposedPorts(MQTT_INTERNAL_PORT)
     .start(); 
 };

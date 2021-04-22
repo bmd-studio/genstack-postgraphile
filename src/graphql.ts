@@ -11,6 +11,7 @@ import { PgMutationUpsertPlugin } from "@fullstackio/postgraphile-upsert-plugin"
 import PgManyToManyPlugin from '@graphile-contrib/pg-many-to-many';
 import PgOrderByRelatedPlugin from '@graphile-contrib/pg-order-by-related';
 import PgSimplifyInflectorPlugin from "@graphile-contrib/pg-simplify-inflector";
+import PgAggregatesPlugin from '@graphile/pg-aggregates';
 
 import hooks from '@bmd-studio/genstack-hooks';
 
@@ -21,7 +22,6 @@ import authentication from './authentication';
 import MqttSubscriptionPlugin from './plugins/MqttSubscriptionPlugin';
 import ManyToManyInflectorPlugin from './plugins/ManyToManyInflectorPlugin';
 import RemoveSecretsPlugin from './plugins/RemoveSecretsPlugin';
-import AggregatesPlugin from './plugins/aggregates';
 import { ServerContext } from './types';
 
 const {
@@ -108,8 +108,8 @@ export const install = ({ app }: ServerContext) => {
       LiveQueriesPlugin,
       PgManyToManyPlugin,
       PgOrderByRelatedPlugin,
+      PgAggregatesPlugin,
       
-      AggregatesPlugin,
       RemoveSecretsPlugin,
   
       GRAPHQL_SIMPLIFY_INFLECTOR_ENABLED ? ManyToManyInflectorPlugin : () => {},
