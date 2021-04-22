@@ -1,24 +1,18 @@
 import _ from 'lodash';
-import { ApolloClient, gql, InMemoryCache, HttpLink } from '@apollo/client/core';
-import fetch from 'cross-fetch';
+import { request, gql } from 'graphql-request';
+import { RequestDocument, Variables } from 'graphql-request/dist/types';
 import { v4 as uuidv4 } from 'uuid';
 
-import { setupTestApp, shutdownTestApp, PROJECT_TABLE_NAME, PROJECT_AMOUNT } from '../setup/app';
+import { setupTestApp, shutdownTestApp, PROJECT_AMOUNT, DEFAULT_PROJECT_POSITION } from '../setup/app';
 import environment from '../../environment';
 
-const getClient = () => {
+const executeRequest = (document: RequestDocument, variables?: Variables) => {
   const {
     DEFAULT_HTTP_PORT
   } = environment.env;
-  const client = new ApolloClient({
-    link: new HttpLink({ 
-      uri: `http://localhost:${DEFAULT_HTTP_PORT}/graphql?admin`, 
-      fetch,
-    }),
-    cache: new InMemoryCache(),
-  });
+  const url = `http://localhost:${DEFAULT_HTTP_PORT}/graphql?admin`;
 
-  return client;
+  return request(url, document, variables);
 }
 
 describe('graphql', () => {
@@ -30,7 +24,7 @@ describe('graphql', () => {
   });
 
   // it('temporary delay to keep test server open', async() => {
-  //   await new Promise((resolve) => {
+  //   await new Promise<void>((resolve) => {
   //     setTimeout(() => {
   //       resolve();
   //     }, 100000);
@@ -38,71 +32,75 @@ describe('graphql', () => {
   // }, 100000);
 
   it('should create schema', async () => {
-    const client = getClient();
-    const result = await client.query({
-      query: gql`
-        {
-          __typename
-        }
-      `,
-    });
+    const result = await executeRequest(gql`
+      {
+        __typename
+      }
+    `);
 
-    expect(result.data.__typename).toBe('Query');
+    expect(result.__typename).toBe('Query');
   });
 
   it('should query projects', async () => {
-    const client = getClient();
-    const result = await client.query({
-      query: gql`
-        {
-          projects {
-            nodes {
-              id
+    const result = await executeRequest(gql`
+      {
+        projects {
+          nodes {
+            id
+          }
+        }
+      }
+    `);
+
+    expect(result?.projects?.nodes).toHaveLength(PROJECT_AMOUNT);
+  });
+
+  it('should query project position sum aggregate', async () => {
+    const result = await executeRequest(gql`
+      {
+        projects {
+          aggregates {
+            sum {
+              position
             }
           }
         }
-      `,
-    });
+      }
+    `);
 
-    expect(result?.data?.projects?.nodes).toHaveLength(PROJECT_AMOUNT);
+    expect(parseInt(result?.projects?.aggregates?.sum?.position ?? -1)).toBe(PROJECT_AMOUNT * DEFAULT_PROJECT_POSITION);
   });
 
   it('should update project name', async () => {
-    const client = getClient();
     const newProjectName = `updated-${uuidv4()}`;
-    const firstProjectResult = await client.query({
-      query: gql`
-        {
-          projects(first: 1) {
-            nodes {
-              id
-            }
+    const firstProjectResult = await executeRequest(gql`
+      {
+        projects(first: 1) {
+          nodes {
+            id
           }
         }
-      `,
-    });
-    const firstProjectId = firstProjectResult?.data?.projects?.nodes?.[0]?.id;
-    const updateResult = await client.mutate({
-      mutation: gql`
-        mutation ($id: UUID!, $name: String!) {
-          updateProject(input: {
-            id: $id,
-            patch: {
-              name: $name
-            }
-          }) {
-            project {
-              name
-            }
-          }
-        }
-      `,
-      variables: {
-        id: firstProjectId,
-        name: newProjectName,
       }
+    `);
+    const firstProjectId = firstProjectResult?.projects?.nodes?.[0]?.id;
+    const updateResult = await executeRequest(gql`
+      mutation ($id: UUID!, $name: String!) {
+        updateProject(input: {
+          id: $id,
+          patch: {
+            name: $name
+          }
+        }) {
+          project {
+            name
+          }
+        }
+      }
+    `, {
+      id: firstProjectId,
+      name: newProjectName,
     });
 
-    expect(updateResult?.data?.updateProject?.project?.name).toBe(newProjectName);
+    expect(updateResult?.updateProject?.project?.name).toBe(newProjectName);
   });
 });

@@ -109,7 +109,7 @@ export const install = ({ app }: ServerContext) => {
       PgManyToManyPlugin,
       PgOrderByRelatedPlugin,
       PgAggregatesPlugin,
-      
+
       RemoveSecretsPlugin,
   
       GRAPHQL_SIMPLIFY_INFLECTOR_ENABLED ? ManyToManyInflectorPlugin : () => {},
@@ -118,6 +118,7 @@ export const install = ({ app }: ServerContext) => {
     ],
 
     graphileBuildOptions: {
+      connectionFilterRelations: true, // for aggregates: https://github.com/graphile/pg-aggregates
       nestedMutationsSimpleFieldNames: GRAPHQL_SIMPLIFY_INFLECTOR_ENABLED ? true : false,
     },
   

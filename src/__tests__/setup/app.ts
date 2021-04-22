@@ -33,6 +33,8 @@ const POSTGRES_HIDDEN_SCHEMA_NAME = 'test_hidden';
 const MQTT_HOST_NAME = '0.0.0.0';
 
 export const PROJECT_TABLE_NAME = 'projects';
+export const DEFAULT_PROJECT_NAME = 'Test Project';
+export const DEFAULT_PROJECT_POSITION = 10;
 
 // The project amount determines the amount of projects seeded in the database,
 // but also the amount of database events trigger AT ONCE (the testing query updates all queries).
@@ -124,8 +126,11 @@ const setupDatabase = async (): Promise<void> => {
 
     CREATE TABLE "${POSTGRES_PUBLIC_SCHEMA_NAME}"."${PROJECT_TABLE_NAME}" (
       id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+      position integer,
       name text
     );
+    CREATE INDEX position_index ON "${POSTGRES_PUBLIC_SCHEMA_NAME}"."${PROJECT_TABLE_NAME}" (position);
+    CREATE INDEX name_index ON "${POSTGRES_PUBLIC_SCHEMA_NAME}"."${PROJECT_TABLE_NAME}" (name);
 
     CREATE ROLE "${adminRoleName}" WITH LOGIN PASSWORD '${POSTGRES_ADMIN_SECRET}';  
     CREATE ROLE "${identityRoleName}" WITH LOGIN PASSWORD '${POSTGRES_IDENTITY_SECRET}';  
@@ -151,13 +156,13 @@ const setupDatabase = async (): Promise<void> => {
     GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE_NAME} TO "${adminRoleName}" WITH GRANT OPTION;
   `);
   const values = _.join(_.map(_.range(0, PROJECT_AMOUNT), () => {
-    return `($1)`;
+    return `($1, $2)`;
   }), ',');
 
   await pgPool.query(`
-    INSERT INTO "${POSTGRES_PUBLIC_SCHEMA_NAME}"."${PROJECT_TABLE_NAME}" (name)
+    INSERT INTO "${POSTGRES_PUBLIC_SCHEMA_NAME}"."${PROJECT_TABLE_NAME}" (name, position)
     VALUES ${values};
-  `, ['Test Project']);
+  `, [DEFAULT_PROJECT_NAME, DEFAULT_PROJECT_POSITION]);
 };
 
 export const setupTestApp = async (): Promise<void> => {
