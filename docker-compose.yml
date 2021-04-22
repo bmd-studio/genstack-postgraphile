@@ -23,8 +23,6 @@ services:
       frontend:
         aliases: 
           - ${SERVICE_NAME} 
-    expose:
-      - ${DEFAULT_HTTP_PORT}
     deploy:
       replicas: ${POSTGRAPHILE_REPLICAS}     
     logging:
