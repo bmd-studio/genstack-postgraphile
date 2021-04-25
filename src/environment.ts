@@ -1,11 +1,15 @@
 import dotenvParseVariables from 'dotenv-parse-variables';
 import { EnvType } from './types';
 
-const parseEnv = (envUnparsed: any) => {
-  return dotenvParseVariables(envUnparsed, {
-    assignToProcessEnv: false,
-    overrideProcessEnv: false,
-  });
+export enum TestMode {
+  Default = 'default',
+  Container = 'container',
+}
+
+export const isTestingContainer = () => {
+  const { TEST_MODE } = environment.env;
+
+  return TEST_MODE === TestMode.Container;
 };
 
 const isEnvironment = (type: EnvType) => {
@@ -16,7 +20,14 @@ const isEnvironment = (type: EnvType) => {
   return GS_ENV === type;
 };
 
-export default {
+const parseEnv = (envUnparsed: any) => {
+  return dotenvParseVariables(envUnparsed, {
+    assignToProcessEnv: false,
+    overrideProcessEnv: false,
+  });
+};
+
+const environment = {
   isProduction: (): boolean => {
     return isEnvironment('production');
   },
@@ -33,6 +44,7 @@ export default {
       DEBUG: 'pg-graphql:error,pg-graphql:info',
       DEBUG_NAMESPACE: 'pg-graphql',
       NODE_ENV: 'development',
+      TEST_MODE: TestMode.Default,
 
       DEFAULT_HTTP_PORT: 4000,
 
@@ -91,3 +103,5 @@ export default {
     };
   },
 };
+
+export default environment;

@@ -2,19 +2,32 @@ name: Test
 on: push
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        # node: [ '12', '14' ]
-        node: [ '12' ]
+        node: [ '12', '14' ]
     name: Using Node ${{ matrix.node }}    
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
       - name: Setup
         run: yarn setup      
       - name: Test from source
         run: yarn test
+  tag:
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: '0'
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.35.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: none

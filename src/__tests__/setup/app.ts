@@ -1,15 +1,17 @@
 import _ from 'lodash';
 import pg, { Pool } from 'pg';
-import { GenericContainer, StartedTestContainer } from 'testcontainers';
+import { GenericContainer, Network, StartedNetwork, StartedTestContainer } from 'testcontainers';
 import getPort from 'get-port';
 
-import environment from '../../environment';
+import environment, { isTestingContainer } from '../../environment';
 
 const POSTGRES_INTERNAL_PORT = 5432;
 const MQTT_INTERNAL_PORT = 1883;
+const HTTP_INTERNAL_PORT = 4000;
 
 const POSTGRES_DOCKER_IMAGE = 'postgres:13.2-alpine';
 const MQTT_DOCKER_IMAGE = 'eclipse-mosquitto:1.6.14';
+const POSTGRAPHILE_DOCKER_IMAGE = 'ghcr.io/bmd-studio/genstack-postgraphile:latest';
 
 const APP_PREFIX = 'test';
 
@@ -42,11 +44,17 @@ export const DEFAULT_PROJECT_POSITION = 10;
 // Note that if you want to stress test with more you likely need to increase the test timeout in your jest config.
 export const PROJECT_AMOUNT = parseInt(process?.env?.PROJECT_AMOUNT ?? '10000');
 
+let network: StartedNetwork;
 let pgContainer: StartedTestContainer; 
 let mqttContainer: StartedTestContainer; 
+let postgraphileContainer: StartedTestContainer; 
 
-const setupTestContainers = async(): Promise<void> => {
+const setupContainers = async(): Promise<void> => {
+  network = await new Network()
+    .start();
+
   pgContainer = await new GenericContainer(POSTGRES_DOCKER_IMAGE)
+    .withNetworkMode(network.getName())
     .withExposedPorts(POSTGRES_INTERNAL_PORT)
     .withEnv('POSTGRES_USER', POSTGRES_SUPER_USER_ROLE_NAME)
     .withEnv('POSTGRES_PASSWORD', POSTGRES_SUPER_USER_SECRET)
@@ -54,24 +62,60 @@ const setupTestContainers = async(): Promise<void> => {
     .start();
 
   mqttContainer = await new GenericContainer(MQTT_DOCKER_IMAGE)
+    .withNetworkMode(network.getName())
     .withExposedPorts(MQTT_INTERNAL_PORT)
     .start(); 
 };
 
-const shutdownTestContainers = async(): Promise<void> => {
-  await pgContainer.stop();
-  await mqttContainer.stop();
+const setupTestContainer = async(): Promise<void> => {
+  postgraphileContainer = await new GenericContainer(POSTGRAPHILE_DOCKER_IMAGE)
+    .withNetworkMode(network.getName())
+    .withExposedPorts(HTTP_INTERNAL_PORT)
+    .withEnv('APP_PREFIX', APP_PREFIX)
+    .withEnv('DEFAULT_HTTP_PORT', String(HTTP_INTERNAL_PORT))
+    .withEnv('GS_ENV', 'staging') // to allow anonymous users for testing
+
+    .withEnv('POSTGRES_HOST_NAME', pgContainer?.getIpAddress(network.getName()))
+    .withEnv('POSTGRES_PORT', String(POSTGRES_INTERNAL_PORT))
+    .withEnv('POSTGRES_DATABASE_NAME', POSTGRES_DATABASE_NAME)
+    .withEnv('POSTGRES_SUPER_USER_ROLE_NAME', POSTGRES_SUPER_USER_ROLE_NAME)
+    .withEnv('POSTGRES_SUPER_USER_SECRET', POSTGRES_SUPER_USER_SECRET) 
+    .withEnv('POSTGRES_ADMIN_ROLE_NAME', POSTGRES_ADMIN_ROLE_NAME) 
+    .withEnv('POSTGRES_ADMIN_SECRET', POSTGRES_ADMIN_SECRET) 
+    .withEnv('POSTGRES_IDENTITY_ROLE_NAME', POSTGRES_IDENTITY_ROLE_NAME)  
+    .withEnv('POSTGRES_IDENTITY_SECRET', POSTGRES_IDENTITY_SECRET) 
+    .withEnv('POSTGRES_ANONYMOUS_ROLE_NAME', POSTGRES_ANONYMOUS_ROLE_NAME) 
+    .withEnv('POSTGRES_ANONYMOUS_SECRET', POSTGRES_ANONYMOUS_SECRET) 
+    .withEnv('POSTGRES_DEFAULT_SCHEMA_NAME', POSTGRES_DEFAULT_SCHEMA_NAME) 
+    .withEnv('POSTGRES_PUBLIC_SCHEMA_NAME', POSTGRES_PUBLIC_SCHEMA_NAME) 
+    .withEnv('POSTGRES_PRIVATE_SCHEMA_NAME', POSTGRES_PRIVATE_SCHEMA_NAME) 
+    .withEnv('POSTGRES_HIDDEN_SCHEMA_NAME', POSTGRES_HIDDEN_SCHEMA_NAME) 
+
+    .withEnv('GRAPHQL_DATABASE_SCHEMA', POSTGRES_PUBLIC_SCHEMA_NAME) 
+
+    .withEnv('MQTT_HOST_NAME', mqttContainer?.getIpAddress(network.getName()))
+    .withEnv('MQTT_PORT', String(MQTT_INTERNAL_PORT))
+    .withEnv('GRAPHQL_MQTT_SUBSCRIPTIONS_ENABLED', 'true')    
+    .start();
+};
+
+const shutdownContainers = async(): Promise<void> => {
+  await pgContainer?.stop();
+  await mqttContainer?.stop();
+  await postgraphileContainer?.stop();
 };
 
 const setupEnv = async (): Promise<void> => {
+  const httpPort = postgraphileContainer?.getMappedPort(HTTP_INTERNAL_PORT) ?? await getPort();
+
   _.assignIn(process.env, {
     NODE_ENV: 'development',
     GS_ENV: 'development',
     APP_PREFIX,    
-    DEFAULT_HTTP_PORT: await getPort(),
+    DEFAULT_HTTP_PORT: httpPort,
 
     POSTGRES_HOST_NAME,
-    POSTGRES_PORT: pgContainer.getMappedPort(POSTGRES_INTERNAL_PORT).toString(),
+    POSTGRES_PORT: pgContainer?.getMappedPort(POSTGRES_INTERNAL_PORT).toString(),
     POSTGRES_DATABASE_NAME,
     POSTGRES_SUPER_USER_ROLE_NAME,
     POSTGRES_SUPER_USER_SECRET,
@@ -89,7 +133,7 @@ const setupEnv = async (): Promise<void> => {
     GRAPHQL_DATABASE_SCHEMA: POSTGRES_PUBLIC_SCHEMA_NAME,
 
     MQTT_HOST_NAME,
-    MQTT_PORT: mqttContainer.getMappedPort(MQTT_INTERNAL_PORT).toString(),
+    MQTT_PORT: mqttContainer?.getMappedPort(MQTT_INTERNAL_PORT).toString(),
     GRAPHQL_MQTT_SUBSCRIPTIONS_ENABLED: true,
   });
 };
@@ -166,17 +210,25 @@ const setupDatabase = async (): Promise<void> => {
 };
 
 export const setupTestApp = async (): Promise<void> => {
-  await setupTestContainers();
+  await setupContainers();
   await setupEnv();
   await setupDatabase();
 
-  const process = require('../../process');
-  await process.startProcess();
+  if (isTestingContainer()) {
+    await setupTestContainer();
+
+    // we need to setup the env twice after the test container
+    // is also booted which exposes the mapped graphql port
+    await setupEnv();
+  } else {
+    const process = require('../../process');
+    await process.startProcess();
+  }
 };
 
 export const shutdownTestApp = async (): Promise<void> => {
   const process = require('../../process');
 
   await process.stopProcess();
-  await shutdownTestContainers();
+  await shutdownContainers();
 };
