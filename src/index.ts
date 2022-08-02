@@ -1,11 +1,1 @@
-import { startProcess, stopProcess } from './process';
-
-process.on('SIGINT', () => {
-  stopProcess();
-});
-
-(async(): Promise<void> => {
-  startProcess();
-})();
-
-
+export { startProcess, stopProcess } from './process';

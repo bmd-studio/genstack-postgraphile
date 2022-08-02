@@ -5,8 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [ '12', '14' ]
-    name: Using Node ${{ matrix.node }}    
+        node: [ '14', '16' ]
+    name: Using Node ${{ matrix.node }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node
@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Setup
-        run: yarn setup      
+        run: yarn setup
       - name: Test from source
         run: yarn test
   tag:

@@ -41,7 +41,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}     
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build image
         id: build
         uses: docker/build-push-action@v2
@@ -56,7 +56,7 @@ jobs:
             DOCKER_BASE_IMAGE=${{ env.DOCKER_BASE_IMAGE }}
             DOCKER_CONTAINER_PLUGINS_PATH=${{ env.DOCKER_CONTAINER_PLUGINS_PATH }}
       - name: Setup test
-        run: yarn setup --production=false              
+        run: yarn setup --production=false
       - name: Test new image
         run: yarn test:container
       - name: Push image
