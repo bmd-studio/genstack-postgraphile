@@ -65,7 +65,7 @@ export const installApp = () => {
 
 /**
  * Create an express server instance compatible with serverless infrastructure
- */  
+ */
 export const installServer = ({ app }: DefaultMiddlewareOptions) => {
 
   // create new server instance
@@ -98,8 +98,8 @@ export const installRouter = ({ app, routerName = 'default', routeBasePath = '/'
 };
 
 /**
- * 
- * @param {*} param0 
+ *
+ * @param {*} param0
  */
 export const installLogging = ({ app }: DefaultMiddlewareOptions) => {
   logger.info(`Installing debugging middleware...`);
@@ -112,7 +112,7 @@ export const installLogging = ({ app }: DefaultMiddlewareOptions) => {
 
 /**
  * Add request parsers to support body, cookie and bearer tokens
- * @param {*} param0 
+ * @param {*} param0
  */
 export const installParsers = ({ app }: DefaultMiddlewareOptions) => {
   logger.info(`Installing parsers middleware...`);
@@ -122,7 +122,7 @@ export const installParsers = ({ app }: DefaultMiddlewareOptions) => {
     limit: GRAPHQL_BODY_SIZE_LIMIT,
   }));
   app.use(bodyParser.urlencoded({ extended: false }));
-  
+
   // initialize cookie parser
   app.use(cookieParser(COOKIE_PARSER_SECRET));
 
@@ -131,7 +131,7 @@ export const installParsers = ({ app }: DefaultMiddlewareOptions) => {
 
 /**
  * Allow CORS requests and add helmet for default security presets
- * @param {*} param0 
+ * @param {*} param0
  */
 export const installSecurity = ({ app }: DefaultMiddlewareOptions) => {
 

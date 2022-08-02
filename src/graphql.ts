@@ -126,7 +126,6 @@ export const install = ({ app }: ServerContext) => {
 
     // subscriptions
     subscriptions: GRAPHQL_SUBSCRIPTIONS_ENABLED,
-    simpleSubscriptions: GRAPHQL_SUBSCRIPTIONS_ENABLED,
     websocketMiddlewares: [
       (req: Request, res: Response, next: Function) => {
 
@@ -166,11 +165,6 @@ export const install = ({ app }: ServerContext) => {
       logger.verbose(pgSettings);
 
       return pgSettings;
-    },
-
-    // resolver settings
-    additionalGraphQLContextFromRequest: (req: Request, res: Response) => {
-      return {};
     },
   });
 
