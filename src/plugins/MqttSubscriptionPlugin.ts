@@ -10,6 +10,7 @@ import chalk from 'chalk';
 
 import environment from '../environment';
 import logger from '../logger';
+
 export interface PgEvent {
   isPgEvent: boolean;
   operationName: string;
@@ -80,12 +81,12 @@ const {
 const INITIALIZE_PAYLOAD_KEY = '__initialize';
 
 const SIFT_OPERATORS = [
-  '_in', '_nin', 
-  '_exists', 
-  '_gte', '_lte', '_lt', '_eq', '_ne', 
-  '_mod', '_all', 
-  '_and', '_or', '_nor', '_not', 
-  '_type', '_regex', 
+  '_in', '_nin',
+  '_exists',
+  '_gte', '_lte', '_lt', '_eq', '_ne',
+  '_mod', '_all',
+  '_and', '_or', '_nor', '_not',
+  '_type', '_regex',
   '_where', '_elemMatch'
 ];
 
@@ -162,7 +163,7 @@ class MqttMessageThrottler {
     this.lastQueueIncrease = Date.now();
     logger.verbose(`Increase MQTT message queue count to ${this.countQueue()} on ${this.lastQueueIncrease}`);
   }
-  
+
   decreaseQueue(): void {
     this.throttledMessage = this.queuedMessages.shift();
     logger.verbose(`Decreased MQTT message queue count to ${this.countQueue()}`);
@@ -170,17 +171,17 @@ class MqttMessageThrottler {
 
   handleQueue(resolve: Function, reject: Function): void {
     const now = Date.now();
-  
+
     // always decrease the current queue
     this.decreaseQueue();
-  
+
     // guard: make sure the requested time elapsed
     if (now - this.lastMessageSent < this.throttleTime) {
       logger.verbose(`Rejected a throttled MQTT message as the delay (${this.throttleTime}) has not passed yet.`);
       reject(false);
       return;
     }
-  
+
     // finally pass the event to the client
     logger.verbose(`Sending a MQTT message to the client. Decreased message queue count to ${this.countQueue()} on ${now}`);
     this.lastMessageSent = now;
@@ -195,7 +196,7 @@ const getMqttMessageFields = (build: GraphileBuild): MqttMessageGraphQLFields =>
     inflection,
     graphql: {
       GraphQLString,
-    },    
+    },
   } = build;
   const GraphQLJSON = getTypeByName('JSON');
   const Query = getTypeByName(inflection.builtin('Query'));
@@ -287,13 +288,13 @@ const getMqttMessageArgs = (build: GraphileBuild) => {
     throttleTrailing: {
       description: 'True when you want to receive an event after the throttled time and after the last time it occurs. Default is `true`.',
       type: GraphQLBoolean,
-    },                        
+    },
   };
 };
 
 const getMqttMessageIterator = (throttler: MqttMessageThrottler, pubsub: MQTTPubSub) => {
   return (_payload: MqttParsedPayload, args: SubscriptionArgs) => {
-    const { 
+    const {
       topics = [],
       qos = MQTT_DEFAULT_QOS,
       initialize = false,
@@ -337,14 +338,14 @@ const getMqttMessageIterator = (throttler: MqttMessageThrottler, pubsub: MQTTPub
 };
 
 const getMqttMessageFilter = (throttler: MqttMessageThrottler) => {
-  return async (payload: MqttParsedPayload, args: SubscriptionArgs, context: SubscriptionContext): Promise<boolean> => { 
+  return async (payload: MqttParsedPayload, args: SubscriptionArgs, context: SubscriptionContext): Promise<boolean> => {
     const {
       pgClient,
     } = context;
-    const { 
-      filter = {}, 
+    const {
+      filter = {},
     } = args;
-    const siftFilter = sift(prefixSiftOperators(filter)); 
+    const siftFilter = sift(prefixSiftOperators(filter));
     const { topic } = throttler.getNextQueuedMessage();
     const isExpired = throttler.lastQueueIncrease <= throttler.lastMessageSent;
     const hasMultipleQueued = throttler.countQueue() > 1;
@@ -408,7 +409,7 @@ const mqttMessageResolver = async (payload: MqttPayload, args: SubscriptionArgs,
   const throttledMessage = throttler?.throttledMessage || {};
   const { topic } = throttledMessage;
 
-  return { 
+  return {
     topic,
     payload,
   };
@@ -429,7 +430,7 @@ export default (builder: SchemaBuilder): void => {
     process.exit(1);
   }
   logger.info(`Successfully connected to the MQTT server.`);
-  
+
   const pubsub = new MQTTPubSub({
     client: mqttClient,
   });
@@ -448,7 +449,7 @@ export default (builder: SchemaBuilder): void => {
     if (!isRootSubscription) {
       return fields;
     }
-  
+
     const mqttMessage = fieldWithHooks(
       'mqttMessage',
       () => {
@@ -456,7 +457,7 @@ export default (builder: SchemaBuilder): void => {
           type: getMqttMessageType(build),
           args: getMqttMessageArgs(build),
           subscribe: async (payload: string, args: SubscriptionArgs, context: SubscriptionContext, resolveInfo: SubscriptionInfo) => {
-            const throttler = new MqttMessageThrottler(args);            
+            const throttler = new MqttMessageThrottler(args);
             logger.verbose(`A new MQTT subscription request is received, with arguments:`, args);
 
             // expand the context with the throttler object
@@ -470,7 +471,7 @@ export default (builder: SchemaBuilder): void => {
             )(payload, args, context, resolveInfo);
 
             return withFilterResult;
-          }, 
+          },
           resolve: mqttMessageResolver,
         };
       },
