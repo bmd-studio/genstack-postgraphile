@@ -2,6 +2,7 @@ import logger from './logger';
 import environment from './environment';
 import { install as installExpress } from './server';
 import { install as installPostgraphile } from './graphql';
+import { ProcessOptions } from './types';
 
 const {
   DEFAULT_HTTP_PORT,
@@ -10,8 +11,8 @@ const {
 } = environment.env;
 
 // install express
-const { app, server, router } = installExpress({ 
-  httpPath: GRAPHQL_PATH 
+const { app, server, router } = installExpress({
+  httpPath: GRAPHQL_PATH
 });
 
 // reboot this service
@@ -25,20 +26,22 @@ export const reboot = (): void => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-export const startProcess = async (): Promise<void> => {
+export const startProcess = async (options?: ProcessOptions): Promise<void> => {
+	const { serverOptions } = options ?? {};
+	const { port = DEFAULT_HTTP_PORT } = serverOptions ?? {};
 
   // initialize the GraphQL handler
-  installPostgraphile({ 
-    app, 
-    server, 
-    router, 
+  installPostgraphile({
+    app,
+    server,
+    router,
   });
 
-  logger.info(`Server starting on port ${DEFAULT_HTTP_PORT}...`);
-  
+  logger.info(`Server starting on port ${port}...`);
+
   return new Promise((resolve, reject) => {
-    server.listen(DEFAULT_HTTP_PORT, () => {
-      logger.info(`🚀 Server running and listening on port ${DEFAULT_HTTP_PORT}...`);
+    server.listen(port, () => {
+      logger.info(`🚀 Server running and listening on port ${port}...`);
       resolve();
     });
   });

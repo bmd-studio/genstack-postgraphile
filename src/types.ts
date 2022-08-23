@@ -1,6 +1,14 @@
 import { Application, Router } from 'express';
 import { Server } from 'net';
 
+export interface ProcessOptions {
+	serverOptions: ServerOptions;
+}
+
+export interface ServerOptions {
+	port: number;
+}
+
 export type AccessToken = string | null;
 
 export interface JwtPayload {
