@@ -1,6 +1,6 @@
 {
   "name": "@bmd-studio/genstack-postgraphile",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Postgraphile extended with authentication, MQTT PubSub and more.",
   "main": "dist/index.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "clean": "rimraf dist/ && rimraf coverage/ && rimraf node_modules/"
   },
   "dependencies": {
-    "@bmd-studio/graphql-mqtt-subscriptions": "1.4.2",
+    "@bmd-studio/graphql-mqtt-subscriptions": "1.4.3",
     "@graphile-contrib/pg-many-to-many": "1.0.1",
     "@graphile-contrib/pg-order-by-related": "1.0.0-beta.6",
     "@graphile-contrib/pg-simplify-inflector": "6.1.0",
@@ -45,7 +45,7 @@
     "jsonwebtoken": "8.5.1",
     "lodash": "4.17.21",
     "morgan": "1.10.0",
-    "mqtt": "4.2.6",
+    "mqtt": "4.3.7",
     "pg": "8.6.0",
     "postgraphile": "4.12.2",
     "postgraphile-plugin-connection-filter": "1.1.3",
