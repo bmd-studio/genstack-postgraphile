@@ -1,21 +1,11 @@
 import _ from 'lodash';
-import { request, gql } from 'graphql-request';
-import { RequestDocument, Variables } from 'graphql-request/dist/types';
+import { gql } from 'graphql-request';
 import { v4 as uuidv4 } from 'uuid';
 
 import { setupTestApp, shutdownTestApp, PROJECT_AMOUNT, DEFAULT_PROJECT_POSITION } from '../setup/app';
-import environment from '../../environment';
+import { executeRequest } from '../helpers';
 
-const executeRequest = (document: RequestDocument, variables?: Variables) => {
-  const {
-    DEFAULT_HTTP_PORT
-  } = environment.env;
-  const url = `http://localhost:${DEFAULT_HTTP_PORT}/graphql?admin`;
-
-  return request(url, document, variables);
-}
-
-describe('graphql', () => {
+describe('schema', () => {
   beforeAll(async () => {
     await setupTestApp();
   });
