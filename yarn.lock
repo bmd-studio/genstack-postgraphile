@@ -378,11 +378,6 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@fullstackio/postgraphile-upsert-plugin@1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@fullstackio/postgraphile-upsert-plugin/-/postgraphile-upsert-plugin-1.4.0.tgz#b2a0e86c8ba6ebc3009127339f9f08a5b4ba1773"
-  integrity sha512-WXYVwmqizcDvtbPeDIr6iJIt99rq98XWjHU+7TSiuviZuGfkH0JF/3QKcKf2kvvyfmZf031rhCJrcjWKKKgCHQ==
-
 "@graphile-contrib/pg-many-to-many@1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@graphile-contrib/pg-many-to-many/-/pg-many-to-many-1.0.1.tgz#c6eb333c877938f7a4fda3da0ee95393b223bd08"
@@ -5120,6 +5115,11 @@ postgraphile-plugin-nested-mutations@1.1.0:
   integrity sha512-zG2OICwWWN6qWeM+9tErE7IjhvaGg+40GU/dgEk/nKE1aG9hoKaSw5q7H51/1XVKwEvSgLo3ERMfUA/agIXzdg==
   dependencies:
     graphile-build-pg "^4.11.2"
+
+postgraphile-upsert-plugin@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/postgraphile-upsert-plugin/-/postgraphile-upsert-plugin-3.0.0.tgz#8657bdaae90c66396f739c2184020f154a594709"
+  integrity sha512-zM9vl5h6WUAi5jTktH02PUYVzISzV5m6q1FV0tYxae6OWHfvVcozx7vk8zMRTCQVJTayIxUuOhQpcJAwbZ+AMw==
 
 postgraphile@4.12.2:
   version "4.12.2"
