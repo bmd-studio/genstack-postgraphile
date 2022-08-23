@@ -7,7 +7,7 @@ import { Request, Response } from 'express';
 import ConnectionFilterPlugin from 'postgraphile-plugin-connection-filter';
 import LiveQueriesPlugin from '@graphile/subscriptions-lds';
 import PostGraphileNestedMutations from 'postgraphile-plugin-nested-mutations';
-import { PgMutationUpsertPlugin } from "@fullstackio/postgraphile-upsert-plugin";
+import { PgMutationUpsertPlugin } from "postgraphile-upsert-plugin";
 import PgManyToManyPlugin from '@graphile-contrib/pg-many-to-many';
 import PgOrderByRelatedPlugin from '@graphile-contrib/pg-order-by-related';
 import PgSimplifyInflectorPlugin from "@graphile-contrib/pg-simplify-inflector";
@@ -17,7 +17,6 @@ import logger from './logger';
 import environment from './environment';
 
 import MqttSubscriptionPlugin from './plugins/MqttSubscriptionPlugin';
-import ManyToManyInflectorPlugin from './plugins/ManyToManyInflectorPlugin';
 import RemoveSecretsPlugin from './plugins/RemoveSecretsPlugin';
 import { ServerContext } from './types';
 import { prefixRoleName, getIdentityByRequest } from './authentication';
@@ -110,7 +109,6 @@ export const install = ({ app }: ServerContext) => {
 
       RemoveSecretsPlugin,
 
-      GRAPHQL_SIMPLIFY_INFLECTOR_ENABLED ? ManyToManyInflectorPlugin : () => {},
       GRAPHQL_SIMPLIFY_INFLECTOR_ENABLED ? PgSimplifyInflectorPlugin : () => {},
       GRAPHQL_MQTT_SUBSCRIPTIONS_ENABLED ? MqttSubscriptionPlugin : () => {},
     ],
