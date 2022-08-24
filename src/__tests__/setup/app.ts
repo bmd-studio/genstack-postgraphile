@@ -45,9 +45,9 @@ export const DEFAULT_PROJECT_POSITION = 10;
 export const PROJECT_AMOUNT = parseInt(process?.env?.PROJECT_AMOUNT ?? '10000');
 
 let network: StartedNetwork;
-let pgContainer: StartedTestContainer; 
-let mqttContainer: StartedTestContainer; 
-let postgraphileContainer: StartedTestContainer; 
+let pgContainer: StartedTestContainer;
+let mqttContainer: StartedTestContainer;
+let postgraphileContainer: StartedTestContainer;
 
 const setupContainers = async(): Promise<void> => {
   network = await new Network()
@@ -64,38 +64,40 @@ const setupContainers = async(): Promise<void> => {
   mqttContainer = await new GenericContainer(MQTT_DOCKER_IMAGE)
     .withNetworkMode(network.getName())
     .withExposedPorts(MQTT_INTERNAL_PORT)
-    .start(); 
+    .start();
 };
 
 const setupTestContainer = async(): Promise<void> => {
+	const { DEFAULT_HTTP_PORT = String(HTTP_INTERNAL_PORT) } = process.env;
+
   postgraphileContainer = await new GenericContainer(POSTGRAPHILE_DOCKER_IMAGE)
     .withNetworkMode(network.getName())
-    .withExposedPorts(HTTP_INTERNAL_PORT)
+    .withExposedPorts(parseInt(DEFAULT_HTTP_PORT))
     .withEnv('APP_PREFIX', APP_PREFIX)
-    .withEnv('DEFAULT_HTTP_PORT', String(HTTP_INTERNAL_PORT))
+    .withEnv('DEFAULT_HTTP_PORT', String(DEFAULT_HTTP_PORT))
     .withEnv('GS_ENV', 'staging') // to allow anonymous users for testing
 
     .withEnv('POSTGRES_HOST_NAME', pgContainer?.getIpAddress(network.getName()))
     .withEnv('POSTGRES_PORT', String(POSTGRES_INTERNAL_PORT))
     .withEnv('POSTGRES_DATABASE_NAME', POSTGRES_DATABASE_NAME)
     .withEnv('POSTGRES_SUPER_USER_ROLE_NAME', POSTGRES_SUPER_USER_ROLE_NAME)
-    .withEnv('POSTGRES_SUPER_USER_SECRET', POSTGRES_SUPER_USER_SECRET) 
-    .withEnv('POSTGRES_ADMIN_ROLE_NAME', POSTGRES_ADMIN_ROLE_NAME) 
-    .withEnv('POSTGRES_ADMIN_SECRET', POSTGRES_ADMIN_SECRET) 
-    .withEnv('POSTGRES_IDENTITY_ROLE_NAME', POSTGRES_IDENTITY_ROLE_NAME)  
-    .withEnv('POSTGRES_IDENTITY_SECRET', POSTGRES_IDENTITY_SECRET) 
-    .withEnv('POSTGRES_ANONYMOUS_ROLE_NAME', POSTGRES_ANONYMOUS_ROLE_NAME) 
-    .withEnv('POSTGRES_ANONYMOUS_SECRET', POSTGRES_ANONYMOUS_SECRET) 
-    .withEnv('POSTGRES_DEFAULT_SCHEMA_NAME', POSTGRES_DEFAULT_SCHEMA_NAME) 
-    .withEnv('POSTGRES_PUBLIC_SCHEMA_NAME', POSTGRES_PUBLIC_SCHEMA_NAME) 
-    .withEnv('POSTGRES_PRIVATE_SCHEMA_NAME', POSTGRES_PRIVATE_SCHEMA_NAME) 
-    .withEnv('POSTGRES_HIDDEN_SCHEMA_NAME', POSTGRES_HIDDEN_SCHEMA_NAME) 
+    .withEnv('POSTGRES_SUPER_USER_SECRET', POSTGRES_SUPER_USER_SECRET)
+    .withEnv('POSTGRES_ADMIN_ROLE_NAME', POSTGRES_ADMIN_ROLE_NAME)
+    .withEnv('POSTGRES_ADMIN_SECRET', POSTGRES_ADMIN_SECRET)
+    .withEnv('POSTGRES_IDENTITY_ROLE_NAME', POSTGRES_IDENTITY_ROLE_NAME)
+    .withEnv('POSTGRES_IDENTITY_SECRET', POSTGRES_IDENTITY_SECRET)
+    .withEnv('POSTGRES_ANONYMOUS_ROLE_NAME', POSTGRES_ANONYMOUS_ROLE_NAME)
+    .withEnv('POSTGRES_ANONYMOUS_SECRET', POSTGRES_ANONYMOUS_SECRET)
+    .withEnv('POSTGRES_DEFAULT_SCHEMA_NAME', POSTGRES_DEFAULT_SCHEMA_NAME)
+    .withEnv('POSTGRES_PUBLIC_SCHEMA_NAME', POSTGRES_PUBLIC_SCHEMA_NAME)
+    .withEnv('POSTGRES_PRIVATE_SCHEMA_NAME', POSTGRES_PRIVATE_SCHEMA_NAME)
+    .withEnv('POSTGRES_HIDDEN_SCHEMA_NAME', POSTGRES_HIDDEN_SCHEMA_NAME)
 
-    .withEnv('GRAPHQL_DATABASE_SCHEMA', POSTGRES_PUBLIC_SCHEMA_NAME) 
+    .withEnv('GRAPHQL_DATABASE_SCHEMA', POSTGRES_PUBLIC_SCHEMA_NAME)
 
     .withEnv('MQTT_HOST_NAME', mqttContainer?.getIpAddress(network.getName()))
     .withEnv('MQTT_PORT', String(MQTT_INTERNAL_PORT))
-    .withEnv('GRAPHQL_MQTT_SUBSCRIPTIONS_ENABLED', 'true')    
+    .withEnv('GRAPHQL_MQTT_SUBSCRIPTIONS_ENABLED', 'true')
     .start();
 };
 
@@ -111,7 +113,7 @@ const setupEnv = async (): Promise<void> => {
   _.assignIn(process.env, {
     NODE_ENV: 'development',
     GS_ENV: 'development',
-    APP_PREFIX,    
+    APP_PREFIX,
     DEFAULT_HTTP_PORT: httpPort,
 
     POSTGRES_HOST_NAME,
@@ -176,9 +178,9 @@ const setupDatabase = async (): Promise<void> => {
     CREATE INDEX position_index ON "${POSTGRES_PUBLIC_SCHEMA_NAME}"."${PROJECT_TABLE_NAME}" (position);
     CREATE INDEX name_index ON "${POSTGRES_PUBLIC_SCHEMA_NAME}"."${PROJECT_TABLE_NAME}" (name);
 
-    CREATE ROLE "${adminRoleName}" WITH LOGIN PASSWORD '${POSTGRES_ADMIN_SECRET}';  
-    CREATE ROLE "${identityRoleName}" WITH LOGIN PASSWORD '${POSTGRES_IDENTITY_SECRET}';  
-    CREATE ROLE "${anonymousRoleName}" WITH LOGIN PASSWORD '${POSTGRES_ANONYMOUS_SECRET}';  
+    CREATE ROLE "${adminRoleName}" WITH LOGIN PASSWORD '${POSTGRES_ADMIN_SECRET}';
+    CREATE ROLE "${identityRoleName}" WITH LOGIN PASSWORD '${POSTGRES_IDENTITY_SECRET}';
+    CREATE ROLE "${anonymousRoleName}" WITH LOGIN PASSWORD '${POSTGRES_ANONYMOUS_SECRET}';
 
     GRANT CONNECT ON DATABASE ${POSTGRES_DATABASE_NAME} TO "${adminRoleName}";
     GRANT CONNECT ON DATABASE ${POSTGRES_DATABASE_NAME} TO "${identityRoleName}";
@@ -193,8 +195,8 @@ const setupDatabase = async (): Promise<void> => {
     GRANT ALL ON ALL TABLES IN SCHEMA "${POSTGRES_PUBLIC_SCHEMA_NAME}" TO "${adminRoleName}" WITH GRANT OPTION;
     GRANT ALL ON ALL SEQUENCES IN SCHEMA "${POSTGRES_PUBLIC_SCHEMA_NAME}" TO "${adminRoleName}" WITH GRANT OPTION;
     GRANT ALL ON ALL FUNCTIONS IN SCHEMA "${POSTGRES_PUBLIC_SCHEMA_NAME}" TO "${adminRoleName}" WITH GRANT OPTION;
-    GRANT ALL ON ALL PROCEDURES IN SCHEMA "${POSTGRES_PUBLIC_SCHEMA_NAME}" TO "${adminRoleName}" WITH GRANT OPTION;  
-    GRANT ALL ON ALL ROUTINES IN SCHEMA "${POSTGRES_PUBLIC_SCHEMA_NAME}" TO "${adminRoleName}" WITH GRANT OPTION;  
+    GRANT ALL ON ALL PROCEDURES IN SCHEMA "${POSTGRES_PUBLIC_SCHEMA_NAME}" TO "${adminRoleName}" WITH GRANT OPTION;
+    GRANT ALL ON ALL ROUTINES IN SCHEMA "${POSTGRES_PUBLIC_SCHEMA_NAME}" TO "${adminRoleName}" WITH GRANT OPTION;
     GRANT "${identityRoleName}" TO "${adminRoleName}" WITH ADMIN OPTION;
     GRANT "${anonymousRoleName}" TO "${adminRoleName}" WITH ADMIN OPTION;
     GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE_NAME} TO "${adminRoleName}" WITH GRANT OPTION;
