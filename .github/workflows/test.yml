@@ -1,5 +1,8 @@
 name: Test
-on: push
+on:
+  push:
+    branches:
+      - master
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -25,9 +28,13 @@ jobs:
       - uses: actions/checkout@master
         with:
           fetch-depth: '0'
-      - name: Bump version and push tag
-        uses: anothrNick/github-tag-action@1.35.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
-          WITH_V: true
-          DEFAULT_BUMP: none
+      - name: Export package.json version to env
+        run: node -p -e '`PACKAGE_VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
+      - name: Push tag with package.json version
+        uses: pkgdeps/git-tag-action@v2
+        with:
+          github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          github_repo: ${{ github.repository }}
+          version: ${{ env.PACKAGE_VERSION }}
+          git_commit_sha: ${{ github.sha }}
+          git_tag_prefix: "v"
