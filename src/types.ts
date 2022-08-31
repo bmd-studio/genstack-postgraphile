@@ -2,13 +2,13 @@ import { Application, Router } from 'express';
 import { Server } from 'net';
 
 export interface ProcessOptions {
-	serverOptions?: ServerOptions;
+  serverOptions?: ServerOptions;
   postgresOptions?: PostgresOptions;
   graphqlOptions?: GraphQLOptions;
 }
 
 export interface ServerOptions {
-	port?: number;
+  port?: number;
   path?: string;
 }
 

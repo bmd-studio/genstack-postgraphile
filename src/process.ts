@@ -26,17 +26,17 @@ export const reboot = (): void => {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const startProcess = async (options?: ProcessOptions): Promise<void> => {
-	logger.info(`Starting process...`);
-	const { serverOptions } = options ?? {};
-	const { port = DEFAULT_HTTP_PORT, path = GRAPHQL_PATH } = serverOptions ?? {};
+  logger.info(`Starting process...`);
+  const { serverOptions } = options ?? {};
+  const { port = DEFAULT_HTTP_PORT, path = GRAPHQL_PATH } = serverOptions ?? {};
 
-	// install express
-	const { app, server, router } = installExpress({
-		httpPath: path,
-	});
+  // install express
+  const { app, server, router } = installExpress({
+    httpPath: path,
+  });
 
-	// cache it for the shutdown process
-	cachedServer = server;
+  // cache it for the shutdown process
+  cachedServer = server;
 
   // initialize the GraphQL handler
   installPostgraphile({
@@ -57,6 +57,6 @@ export const startProcess = async (options?: ProcessOptions): Promise<void> => {
 };
 
 export const stopProcess = async (): Promise<void> => {
-	logger.info(`Stopping process...`);
+  logger.info(`Stopping process...`);
   cachedServer?.close();
 };
