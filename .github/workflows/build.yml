@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Environment Variables from Dotenv
         uses: c-py/action-dotenv-to-setenv@v3
         with:
