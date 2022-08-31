@@ -1,6 +1,6 @@
 {
   "name": "@bmd-studio/genstack-postgraphile",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "description": "Postgraphile extended with authentication, MQTT PubSub and more.",
   "main": "dist/index.js",
   "scripts": {
