@@ -3,6 +3,7 @@ import pg, { Pool } from 'pg';
 import { GenericContainer, Network, StartedNetwork, StartedTestContainer } from 'testcontainers';
 import getPort from 'get-port';
 
+import logger from '../../logger';
 import environment, { isTestingContainer } from '../../environment';
 
 const POSTGRES_INTERNAL_PORT = 5432;
@@ -50,9 +51,11 @@ let mqttContainer: StartedTestContainer;
 let postgraphileContainer: StartedTestContainer;
 
 const setupContainers = async(): Promise<void> => {
+	logger.info('Initializing network...');
   network = await new Network()
     .start();
 
+	logger.info(`Initializing Postgres container: ${POSTGRES_DOCKER_IMAGE}`);
   pgContainer = await new GenericContainer(POSTGRES_DOCKER_IMAGE)
     .withNetworkMode(network.getName())
     .withExposedPorts(POSTGRES_INTERNAL_PORT)
@@ -61,20 +64,22 @@ const setupContainers = async(): Promise<void> => {
     .withEnv('POSTGRES_DB', POSTGRES_DATABASE_NAME)
     .start();
 
+	logger.info(`Initializing MQTT container: ${MQTT_DOCKER_IMAGE}`);
   mqttContainer = await new GenericContainer(MQTT_DOCKER_IMAGE)
     .withNetworkMode(network.getName())
     .withExposedPorts(MQTT_INTERNAL_PORT)
     .start();
+
+	logger.info(`All containers are now running!`);
 };
 
 const setupTestContainer = async(): Promise<void> => {
-	const { DEFAULT_HTTP_PORT = String(HTTP_INTERNAL_PORT) } = process.env;
-
+	logger.info(`Initializing Postgraphile container: ${POSTGRAPHILE_DOCKER_IMAGE}`);
   postgraphileContainer = await new GenericContainer(POSTGRAPHILE_DOCKER_IMAGE)
     .withNetworkMode(network.getName())
-    .withExposedPorts(parseInt(DEFAULT_HTTP_PORT))
+    .withExposedPorts(HTTP_INTERNAL_PORT)
     .withEnv('APP_PREFIX', APP_PREFIX)
-    .withEnv('DEFAULT_HTTP_PORT', String(DEFAULT_HTTP_PORT))
+    .withEnv('DEFAULT_HTTP_PORT', String(HTTP_INTERNAL_PORT))
     .withEnv('GS_ENV', 'staging') // to allow anonymous users for testing
 
     .withEnv('POSTGRES_HOST_NAME', pgContainer?.getIpAddress(network.getName()))
@@ -99,6 +104,8 @@ const setupTestContainer = async(): Promise<void> => {
     .withEnv('MQTT_PORT', String(MQTT_INTERNAL_PORT))
     .withEnv('GRAPHQL_MQTT_SUBSCRIPTIONS_ENABLED', 'true')
     .start();
+
+		logger.info(`Postgraphile container is now running and listening on port: ${HTTP_INTERNAL_PORT}`);
 };
 
 const shutdownContainers = async(): Promise<void> => {
@@ -163,6 +170,7 @@ const setupDatabase = async (): Promise<void> => {
   const identityRoleName = prefixRoleName(POSTGRES_IDENTITY_ROLE_NAME);
   const anonymousRoleName = prefixRoleName(POSTGRES_ANONYMOUS_ROLE_NAME);
 
+	logger.info(`Database is being setup with admin role: ${adminRoleName}`);
   await pgPool.query(`
     CREATE EXTENSION "uuid-ossp";
 
@@ -212,17 +220,20 @@ const setupDatabase = async (): Promise<void> => {
 };
 
 export const setupTestApp = async (): Promise<void> => {
+	logger.info(`Setting up test app...`);
   await setupContainers();
   await setupEnv();
   await setupDatabase();
 
   if (isTestingContainer()) {
+		logger.info(`Setting up the test container...`);
     await setupTestContainer();
 
     // we need to setup the env twice after the test container
     // is also booted which exposes the mapped graphql port
     await setupEnv();
   } else {
+		logger.info(`Setting up the Node environment...`);
     const process = require('../../process');
     await process.startProcess();
   }

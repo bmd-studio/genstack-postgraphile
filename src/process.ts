@@ -1,3 +1,5 @@
+import { Server } from 'net';
+
 import logger from './logger';
 import environment from './environment';
 import { install as installExpress } from './server';
@@ -10,10 +12,7 @@ const {
   NODE_ENV,
 } = environment.env;
 
-// install express
-const { app, server, router } = installExpress({
-  httpPath: GRAPHQL_PATH
-});
+let cachedServer: Server | undefined;
 
 // reboot this service
 export const reboot = (): void => {
@@ -27,8 +26,17 @@ export const reboot = (): void => {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const startProcess = async (options?: ProcessOptions): Promise<void> => {
+	logger.info(`Starting process...`);
 	const { serverOptions } = options ?? {};
 	const { port = DEFAULT_HTTP_PORT } = serverOptions ?? {};
+
+	// install express
+	const { app, server, router } = installExpress({
+		httpPath: GRAPHQL_PATH
+	});
+
+	// cache it for the shutdown process
+	cachedServer = server;
 
   // initialize the GraphQL handler
   installPostgraphile({
@@ -48,5 +56,6 @@ export const startProcess = async (options?: ProcessOptions): Promise<void> => {
 };
 
 export const stopProcess = async (): Promise<void> => {
-  server.close();
+	logger.info(`Stopping process...`);
+  cachedServer?.close();
 };
