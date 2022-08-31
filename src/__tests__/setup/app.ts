@@ -74,7 +74,12 @@ const setupContainers = async(): Promise<void> => {
 };
 
 const setupTestContainer = async(): Promise<void> => {
+	const postgresHostName = pgContainer?.getIpAddress(network.getName());
+	const postgresPort = String(environment.env.POSTGRES_PORT);
+
 	logger.info(`Initializing Postgraphile container: ${POSTGRAPHILE_DOCKER_IMAGE}`);
+	logger.info(`Connecting to Postgres on ${postgresHostName}:${postgresPort}`);
+
   postgraphileContainer = await new GenericContainer(POSTGRAPHILE_DOCKER_IMAGE)
     .withNetworkMode(network.getName())
     .withExposedPorts(HTTP_INTERNAL_PORT)
@@ -82,8 +87,8 @@ const setupTestContainer = async(): Promise<void> => {
     .withEnv('DEFAULT_HTTP_PORT', String(HTTP_INTERNAL_PORT))
     .withEnv('GS_ENV', 'staging') // to allow anonymous users for testing
 
-    .withEnv('POSTGRES_HOST_NAME', pgContainer?.getIpAddress(network.getName()))
-    .withEnv('POSTGRES_PORT', String(POSTGRES_INTERNAL_PORT))
+    .withEnv('POSTGRES_HOST_NAME', postgresHostName)
+    .withEnv('POSTGRES_PORT', postgresPort)
     .withEnv('POSTGRES_DATABASE_NAME', POSTGRES_DATABASE_NAME)
     .withEnv('POSTGRES_SUPER_USER_ROLE_NAME', POSTGRES_SUPER_USER_ROLE_NAME)
     .withEnv('POSTGRES_SUPER_USER_SECRET', POSTGRES_SUPER_USER_SECRET)
@@ -116,6 +121,7 @@ const shutdownContainers = async(): Promise<void> => {
 
 const setupEnv = async (): Promise<void> => {
   const httpPort = postgraphileContainer?.getMappedPort(HTTP_INTERNAL_PORT) ?? await getPort();
+	const postgresPort = pgContainer?.getMappedPort(POSTGRES_INTERNAL_PORT).toString();
 
   _.assignIn(process.env, {
     NODE_ENV: 'development',
@@ -124,7 +130,7 @@ const setupEnv = async (): Promise<void> => {
     DEFAULT_HTTP_PORT: httpPort,
 
     POSTGRES_HOST_NAME,
-    POSTGRES_PORT: pgContainer?.getMappedPort(POSTGRES_INTERNAL_PORT).toString(),
+    POSTGRES_PORT: postgresPort,
     POSTGRES_DATABASE_NAME,
     POSTGRES_SUPER_USER_ROLE_NAME,
     POSTGRES_SUPER_USER_SECRET,
@@ -217,6 +223,8 @@ const setupDatabase = async (): Promise<void> => {
     INSERT INTO "${POSTGRES_PUBLIC_SCHEMA_NAME}"."${PROJECT_TABLE_NAME}" (name, position)
     VALUES ${values};
   `, [DEFAULT_PROJECT_NAME, DEFAULT_PROJECT_POSITION]);
+
+	logger.info(`Database is setup and seeded with data!`);
 };
 
 export const setupTestApp = async (): Promise<void> => {
@@ -240,6 +248,7 @@ export const setupTestApp = async (): Promise<void> => {
 };
 
 export const shutdownTestApp = async (): Promise<void> => {
+	logger.info('Shutting down test app...');
   const process = require('../../process');
 
   await process.stopProcess();

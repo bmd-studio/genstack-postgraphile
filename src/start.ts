@@ -4,6 +4,7 @@ import { startProcess, stopProcess } from './process';
 logger.info(`Starting the main process...`);
 
 process.on('SIGINT', () => {
+	logger.info(`Stopping process due to SIGINT...`);
   stopProcess();
 });
 
