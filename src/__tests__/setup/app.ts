@@ -20,13 +20,13 @@ const POSTGRES_HOST_NAME = '0.0.0.0';
 const POSTGRES_DATABASE_NAME = 'test';
 
 const POSTGRES_SUPER_USER_ROLE_NAME = 'postgres';
-const POSTGRES_SUPER_USER_SECRET = 'password';
+const POSTGRES_SUPER_USER_SECRET = 'super-user-password';
 const POSTGRES_ADMIN_ROLE_NAME = 'admin';
-const POSTGRES_ADMIN_SECRET = 'password';
+const POSTGRES_ADMIN_SECRET = 'admin-password';
 const POSTGRES_IDENTITY_ROLE_NAME = 'identity';
-const POSTGRES_IDENTITY_SECRET = 'password';
+const POSTGRES_IDENTITY_SECRET = 'identity-password';
 const POSTGRES_ANONYMOUS_ROLE_NAME = 'anonymous';
-const POSTGRES_ANONYMOUS_SECRET = 'password';
+const POSTGRES_ANONYMOUS_SECRET = 'anonymous-password';
 
 const POSTGRES_DEFAULT_SCHEMA_NAME = 'public';
 const POSTGRES_PUBLIC_SCHEMA_NAME = 'test_public';
@@ -83,6 +83,7 @@ const setupTestContainer = async(): Promise<void> => {
   postgraphileContainer = await new GenericContainer(POSTGRAPHILE_DOCKER_IMAGE)
     .withNetworkMode(network.getName())
     .withExposedPorts(HTTP_INTERNAL_PORT)
+    .withEnv('NODE_ENV', 'development') // for anonymous access to the database without JWT
     .withEnv('APP_PREFIX', APP_PREFIX)
     .withEnv('DEFAULT_HTTP_PORT', String(HTTP_INTERNAL_PORT))
 
@@ -157,7 +158,7 @@ const getPgPool = async(): Promise<pg.Pool> => {
     host: POSTGRES_HOST_NAME,
     port: POSTGRES_PORT,
     user: POSTGRES_SUPER_USER_ROLE_NAME,
-    password: POSTGRES_ADMIN_SECRET,
+    password: POSTGRES_SUPER_USER_SECRET,
     database: POSTGRES_DATABASE_NAME,
   });
 

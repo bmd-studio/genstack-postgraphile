@@ -61,7 +61,7 @@ export const install = ({ app, processOptions }: ServerContext) => {
   logger.info(`Preparing PostGraphile middleware for Postgres ${host}:${port} with user ${adminUser} on schema ${graphqlSchemaName}...`);
 
   const getSuperUserUrl = () => {
-    return `postgres://${superUser}:${POSTGRES_SUPER_USER_SECRET}@${host}:${port}/${postgresSchemaName}`;
+    return `postgres://${superUser}:${superUserPassword}@${host}:${port}/${postgresSchemaName}`;
   };
 
   const pgOptions: pg.ConnectionConfig = {
