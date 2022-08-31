@@ -14,10 +14,10 @@ export const isTestingContainer = () => {
 
 const isEnvironment = (type: EnvType) => {
   const {
-    GS_ENV = 'production',
+    NODE_ENV = 'production',
   } = process.env;
-  
-  return GS_ENV === type;
+
+  return NODE_ENV === type;
 };
 
 const parseEnv = (envUnparsed: any) => {
@@ -40,7 +40,7 @@ const environment = {
     const parsedProcessEnv = parseEnv(process.env);
 
     return {
-      APP_PREFIX: 'project', 
+      APP_PREFIX: 'project',
       DEBUG: 'pg-graphql:error,pg-graphql:info',
       DEBUG_NAMESPACE: 'pg-graphql',
       NODE_ENV: 'development',

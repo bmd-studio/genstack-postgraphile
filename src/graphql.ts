@@ -45,29 +45,38 @@ const {
   GRAPHQL_SUBSCRIPTIONS_ENABLED,
 } = environment.env;
 
-export const install = ({ app }: ServerContext) => {
-  const adminPostgresUser = prefixRoleName(POSTGRES_ADMIN_ROLE_NAME);
+export const install = ({ app, processOptions }: ServerContext) => {
   const isTestEnvironment = (NODE_ENV === 'test');
+  const prefixedAdminUser = prefixRoleName(POSTGRES_ADMIN_ROLE_NAME);
+  const { postgresOptions = {}, graphqlOptions = {} } = processOptions ?? {};
+  const {
+    host = POSTGRES_HOST_NAME, port = POSTGRES_PORT, adminUser = prefixedAdminUser,
+    adminUserPassword = POSTGRES_ADMIN_SECRET, database: postgresSchemaName = POSTGRES_DATABASE_NAME,
+    superUser = POSTGRES_SUPER_USER_ROLE_NAME, superUserPassword = POSTGRES_SUPER_USER_SECRET,
+  } = postgresOptions;
+  const {
+    databaseSchema: graphqlSchemaName = GRAPHQL_DATABASE_SCHEMA,
+  } = graphqlOptions;
 
-  logger.info(`Preparing PostGraphile middleware for Postgres ${POSTGRES_HOST_NAME}:${POSTGRES_PORT} with user ${adminPostgresUser} on schema ${GRAPHQL_DATABASE_SCHEMA}...`);
+  logger.info(`Preparing PostGraphile middleware for Postgres ${host}:${port} with user ${adminUser} on schema ${graphqlSchemaName}...`);
 
   const getSuperUserUrl = () => {
-    return `postgres://${POSTGRES_SUPER_USER_ROLE_NAME}:${POSTGRES_SUPER_USER_SECRET}@${POSTGRES_HOST_NAME}:${POSTGRES_PORT}/${POSTGRES_DATABASE_NAME}`;
+    return `postgres://${superUser}:${POSTGRES_SUPER_USER_SECRET}@${host}:${port}/${postgresSchemaName}`;
   };
 
   const pgOptions: pg.ConnectionConfig = {
-    host: POSTGRES_HOST_NAME,
-    port: POSTGRES_PORT,
-    user: adminPostgresUser,
-    password: POSTGRES_ADMIN_SECRET,
-    database: POSTGRES_DATABASE_NAME,
+    host,
+    port,
+    user: adminUser,
+    password: adminUserPassword,
+    database: postgresSchemaName,
   };
 
   const pgPool = new pg.Pool(pgOptions);
 
   // create postgraphile middleware
   // @ts-ignore
-  const postgraphileMiddleware = postgraphile(pgPool, GRAPHQL_DATABASE_SCHEMA, {
+  const postgraphileMiddleware = postgraphile(pgPool, graphqlSchemaName, {
 
     // debugging
     // https://github.com/brianc/node-postgres/blob/7de137f9f88611b8fcae5539aa90b6037133f1f1/lib/connection.js#L565-L580

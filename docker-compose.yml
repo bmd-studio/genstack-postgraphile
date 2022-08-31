@@ -2,29 +2,28 @@ version: '3.7'
 
 services:
   postgraphile:
-    container_name: ${COMPOSE_PROJECT_NAME}_${SERVICE_NAME}_${GS_ENV}
+    container_name: ${COMPOSE_PROJECT_NAME}_${SERVICE_NAME}
     restart: ${DOCKER_RESTART_POLICY}
-    image: ${DOCKER_IMAGE_REGISTRY:-}${APP_PREFIX}/${SERVICE_NAME}:${APP_VERSION}-${GS_ENV}
+    image: ${DOCKER_IMAGE_REGISTRY:-}${APP_PREFIX}/${SERVICE_NAME}:${APP_VERSION}
     build:
       context: ./
       args:
-        - DOCKER_BASE_IMAGE 
-        - GS_ENV
-        - DOCKER_CONTAINER_PLUGINS_PATH
-    init: true  
-    cap_drop: 
-      - ALL 
+        - DOCKER_BASE_IMAGE
+        - NODE_ENV
+    init: true
+    cap_drop:
+      - ALL
     env_file:
-      - ${DOCKER_GENERATED_ENV_FILE:-./env/defaults}    
+      - ${DOCKER_GENERATED_ENV_FILE:-./env/defaults}
     networks:
       backend:
-        aliases: 
+        aliases:
           - ${SERVICE_NAME}
       frontend:
-        aliases: 
-          - ${SERVICE_NAME} 
+        aliases:
+          - ${SERVICE_NAME}
     deploy:
-      replicas: ${POSTGRAPHILE_REPLICAS}     
+      replicas: ${POSTGRAPHILE_REPLICAS}
     logging:
       driver: ${DOCKER_LOGGING_DRIVER}
       options:
@@ -36,7 +35,7 @@ services:
 
       - traefik.http.routers.${APP_PREFIX}-${SERVICE_NAME}-host.rule=HostRegexp(`${SERVICE_NAME}.${APP_PREFIX}.${PROXY_ROUTER_DOMAIN}`)
       - traefik.http.routers.${APP_PREFIX}-${SERVICE_NAME}-path.rule=PathPrefix(`/${APP_PREFIX}/${SERVICE_NAME}`)
-      
+
       - traefik.http.services.${APP_PREFIX}-${SERVICE_NAME}.loadbalancer.server.port=${DEFAULT_HTTP_PORT}
 
       - traefik.http.middlewares.${APP_PREFIX}-${SERVICE_NAME}-ratelimit.ratelimit.burst=${POSTGRAPHILE_RATE_LIMIT_BURST}

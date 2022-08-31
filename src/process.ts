@@ -28,11 +28,11 @@ export const reboot = (): void => {
 export const startProcess = async (options?: ProcessOptions): Promise<void> => {
 	logger.info(`Starting process...`);
 	const { serverOptions } = options ?? {};
-	const { port = DEFAULT_HTTP_PORT } = serverOptions ?? {};
+	const { port = DEFAULT_HTTP_PORT, path = GRAPHQL_PATH } = serverOptions ?? {};
 
 	// install express
 	const { app, server, router } = installExpress({
-		httpPath: GRAPHQL_PATH
+		httpPath: path,
 	});
 
 	// cache it for the shutdown process
@@ -43,6 +43,7 @@ export const startProcess = async (options?: ProcessOptions): Promise<void> => {
     app,
     server,
     router,
+    processOptions: options,
   });
 
   logger.info(`Server starting on port ${port}...`);

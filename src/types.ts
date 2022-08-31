@@ -2,11 +2,28 @@ import { Application, Router } from 'express';
 import { Server } from 'net';
 
 export interface ProcessOptions {
-	serverOptions: ServerOptions;
+	serverOptions?: ServerOptions;
+  postgresOptions?: PostgresOptions;
+  graphqlOptions?: GraphQLOptions;
 }
 
 export interface ServerOptions {
-	port: number;
+	port?: number;
+  path?: string;
+}
+
+export interface PostgresOptions {
+  host?: string;
+  port?: number;
+  superUser?: string;
+  superUserPassword?: string;
+  adminUser?: string;
+  adminUserPassword?: string;
+  database?: string;
+}
+
+export interface GraphQLOptions {
+  databaseSchema?: string;
 }
 
 export type AccessToken = string | null;
@@ -24,6 +41,7 @@ export interface ServerContext {
   app: Application;
   server: Server;
   router: Router;
+  processOptions?: ProcessOptions;
 }
 
 export type EnvType = 'development' | 'staging' | 'production';

@@ -85,7 +85,6 @@ const setupTestContainer = async(): Promise<void> => {
     .withExposedPorts(HTTP_INTERNAL_PORT)
     .withEnv('APP_PREFIX', APP_PREFIX)
     .withEnv('DEFAULT_HTTP_PORT', String(HTTP_INTERNAL_PORT))
-    .withEnv('GS_ENV', 'staging') // to allow anonymous users for testing
 
     .withEnv('POSTGRES_HOST_NAME', postgresHostName)
     .withEnv('POSTGRES_PORT', postgresPort)
@@ -125,7 +124,6 @@ const setupEnv = async (): Promise<void> => {
 
   _.assignIn(process.env, {
     NODE_ENV: 'development',
-    GS_ENV: 'development',
     APP_PREFIX,
     DEFAULT_HTTP_PORT: httpPort,
 

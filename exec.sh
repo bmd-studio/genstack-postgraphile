@@ -1,6 +1,6 @@
-#!/bin/sh -x   
+#!/bin/sh -x
 
-if [ "$GS_ENV" == "development" ]; then
+if [ "$NODE_ENV" == "development" ]; then
     echo "Running in development..."
     yarn start:pm2
 else

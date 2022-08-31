@@ -52,9 +52,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            GS_ENV=production
+            NODE_ENV=production
             DOCKER_BASE_IMAGE=${{ env.DOCKER_BASE_IMAGE }}
-            DOCKER_CONTAINER_PLUGINS_PATH=${{ env.DOCKER_CONTAINER_PLUGINS_PATH }}
       - name: Setup test
         run: yarn setup --production=false
       - name: Test new image
@@ -67,9 +66,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            GS_ENV=production
+            NODE_ENV=production
             DOCKER_BASE_IMAGE=${{ env.DOCKER_BASE_IMAGE }}
-            DOCKER_CONTAINER_PLUGINS_PATH=${{ env.DOCKER_CONTAINER_PLUGINS_PATH }}
-      - name: Dump docker logs on failure
-        if: failure()
-        uses: jwalton/gh-docker-logs@v1

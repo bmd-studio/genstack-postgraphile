@@ -6,8 +6,7 @@ COPY ./ ./
 RUN yarn --frozen-lockfile
 RUN yarn build
 
-ARG GS_ENV
-ARG DOCKER_CONTAINER_PLUGINS_PATH
+ARG NODE_ENV
 RUN /bin/sh setup.sh
 
 FROM $DOCKER_BASE_IMAGE as base
