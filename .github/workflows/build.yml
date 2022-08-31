@@ -70,6 +70,6 @@ jobs:
             GS_ENV=production
             DOCKER_BASE_IMAGE=${{ env.DOCKER_BASE_IMAGE }}
             DOCKER_CONTAINER_PLUGINS_PATH=${{ env.DOCKER_CONTAINER_PLUGINS_PATH }}
-			- name: Dump docker logs on failure
+      - name: Dump docker logs on failure
         if: failure()
         uses: jwalton/gh-docker-logs@v1
