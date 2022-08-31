@@ -75,10 +75,10 @@ const setupContainers = async(): Promise<void> => {
 
 const setupTestContainer = async(): Promise<void> => {
 	const postgresHostName = pgContainer?.getIpAddress(network.getName());
-	const postgresPort = String(environment.env.POSTGRES_PORT);
+	const postgresPort = String(POSTGRES_INTERNAL_PORT); // String(environment.env.POSTGRES_PORT);
 
 	logger.info(`Initializing Postgraphile container: ${POSTGRAPHILE_DOCKER_IMAGE}`);
-	logger.info(`Connecting to Postgres on ${postgresHostName}:${postgresPort}`);
+	logger.info(`With Postgres host and port ${postgresHostName}:${postgresPort}`);
 
   postgraphileContainer = await new GenericContainer(POSTGRAPHILE_DOCKER_IMAGE)
     .withNetworkMode(network.getName())
