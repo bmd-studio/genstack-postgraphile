@@ -42,9 +42,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Dump docker logs on failure
-        if: failure()
-        uses: jwalton/gh-docker-logs@v1
       - name: Build image
         id: build
         uses: docker/build-push-action@v2
@@ -73,3 +70,6 @@ jobs:
             GS_ENV=production
             DOCKER_BASE_IMAGE=${{ env.DOCKER_BASE_IMAGE }}
             DOCKER_CONTAINER_PLUGINS_PATH=${{ env.DOCKER_CONTAINER_PLUGINS_PATH }}
+			- name: Dump docker logs on failure
+        if: failure()
+        uses: jwalton/gh-docker-logs@v1
