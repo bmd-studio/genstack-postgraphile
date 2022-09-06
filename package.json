@@ -1,6 +1,6 @@
 {
   "name": "@bmd-studio/genstack-postgraphile",
-  "version": "4.0.14",
+  "version": "4.0.15",
   "description": "Postgraphile extended with authentication, MQTT PubSub and more.",
   "main": "dist/index.js",
   "scripts": {
@@ -96,7 +96,7 @@
     "@types/uuid": "8.3.0",
     "cross-env": "7.0.3",
     "get-port": "5.1.1",
-    "graphql": "15.5.0",
+    "graphql": "14.7.0",
     "graphql-request": "3.4.0",
     "http-status-codes": "2.1.4",
     "jest": "26.6.3",
@@ -109,6 +109,6 @@
     "uuid": "8.3.2"
   },
   "resolutions": {
-    "graphql": "15.5.0"
+    "graphql": "14.7.0"
   }
 }

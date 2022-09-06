@@ -136,6 +136,8 @@ export const installParsers = ({ app }: DefaultMiddlewareOptions) => {
 export const installSecurity = ({ app }: DefaultMiddlewareOptions) => {
 
   logger.info(`Installing security middleware...`);
+  logger.info(`The allowed CORS domains are:`);
+  logger.info(GRAPHQL_CORS_DOMAINS);
 
   app.use(cors({
     origin: GRAPHQL_CORS_DOMAINS,
