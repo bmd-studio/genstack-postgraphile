@@ -34,7 +34,7 @@ describe('schema', () => {
   it('should query projects', async () => {
     const result = await executeRequest(gql`
       {
-        projects {
+        projects(orderBy: [POSITION_ASC]) {
           nodes {
             id
           }
