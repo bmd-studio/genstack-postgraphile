@@ -83,7 +83,7 @@ const setupTestContainer = async(): Promise<void> => {
   postgraphileContainer = await new GenericContainer(POSTGRAPHILE_DOCKER_IMAGE)
     .withNetworkMode(network.getName())
     .withExposedPorts(HTTP_INTERNAL_PORT)
-    .withEnv('NODE_ENV', 'development') // for anonymous access to the database without JWT
+    .withEnv('NODE_ENV', 'staging') // for anonymous access to the database without JWT
     .withEnv('APP_PREFIX', APP_PREFIX)
     .withEnv('DEFAULT_HTTP_PORT', String(HTTP_INTERNAL_PORT))
 
